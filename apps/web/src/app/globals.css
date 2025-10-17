@@ -1,0 +1,243 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    /* Light mode colors */
+    --background: 0 0% 100%; /* white */
+    --foreground: 240 10% 3.9%; /* near black */
+    --card: 0 0% 100%; /* white */
+    --card-foreground: 240 10% 3.9%; /* near black */
+    --popover: 0 0% 100%; /* white */
+    --popover-foreground: 240 10% 3.9%; /* near black */
+    --primary: 240 9% 9%; /* dark */
+    --primary-foreground: 0 0% 98%; /* light */
+    --secondary: 240 4.8% 95.9%; /* light gray */
+    --secondary-foreground: 240 5.9% 10%; /* dark */
+    --muted: 240 4.8% 95.9%; /* light gray */
+    --muted-foreground: 240 3.8% 46.1%; /* mid gray */
+    --accent: 240 4.8% 95.9%; /* light gray */
+    --accent-foreground: 240 5.9% 10%; /* dark */
+    --destructive: 0 84.2% 60.2%; /* red */
+    --destructive-foreground: 0 0% 98%; /* white */
+    --border: 240 5.9% 90%; /* light border */
+    --input: 240 5.9% 90%; /* light input */
+    --ring: 240 10% 3.9%; /* dark ring */
+    --radius: 0.5rem;
+    
+    /* Branding colors */
+    --branding-50: 33 100% 96%;
+    --branding-100: 33 100% 90%;
+    --branding-200: 33 100% 80%;
+    --branding-300: 33 100% 70%;
+    --branding-400: 33 100% 60%;
+    --branding-500: 17 98% 46%;
+    --branding-600: 17 98% 40%;
+    --branding-700: 17 98% 35%;
+    --branding-800: 17 98% 30%;
+    --branding-900: 17 98% 25%;
+  }
+
+  .dark {
+    /* Dark mode colors */
+    --background: 240 10% 3.9%; /* dark */
+    --foreground: 0 0% 98%; /* white */
+    --card: 240 10% 3.9%; /* dark */
+    --card-foreground: 0 0% 98%; /* white */
+    --popover: 240 10% 3.9%; /* dark */
+    --popover-foreground: 0 0% 98%; /* white */
+    --primary: 0 0% 98%; /* white */
+    --primary-foreground: 240 5.9% 10%; /* dark */
+    --secondary: 240 3.7% 15.9%; /* dark gray */
+    --secondary-foreground: 0 0% 98%; /* white */
+    --muted: 240 3.7% 15.9%; /* dark gray */
+    --muted-foreground: 240 5% 64.9%; /* light gray */
+    --accent: 240 3.7% 15.9%; /* dark gray */
+    --accent-foreground: 0 0% 98%; /* white */
+    --destructive: 0 62.8% 30.6%; /* dark red */
+    --destructive-foreground: 0 0% 98%; /* white */
+    --border: 240 3.7% 15.9%; /* dark border */
+    --input: 240 3.7% 15.9%; /* dark input */
+    --ring: 240 4.9% 83.9%; /* light ring */
+  }
+
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply bg-background text-foreground;
+  }
+}
+
+@layer utilities {
+  /* Text gradient using your color palette */
+  .text-gradient {
+    background: linear-gradient(135deg, #000000, #C10E01, #E16001, #D9C5AB);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+
+  /* Glow effects with orange */
+  .glow {
+    box-shadow: 0 0 20px rgb(232 80 2 / 0.3),
+                0 0 40px rgb(232 80 2 / 0.2),
+                0 0 60px rgb(232 80 2 / 0.1);
+  }
+  
+  .glow-hover:hover {
+    box-shadow: 0 0 20px rgb(232 80 2 / 0.3),
+                0 0 40px rgb(232 80 2 / 0.2),
+                0 0 60px rgb(232 80 2 / 0.1);
+  }
+
+  /* Animation utilities */
+  .animate-fade-in {
+    animation: fade-in 0.6s ease-out forwards;
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Scroll stack animations */
+  .scroll-stack-item {
+    transform-origin: center;
+    transition: all 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  .scroll-stack-item.active {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+
+  .scroll-stack-item.inactive {
+    transform: scale(0.95);
+    opacity: 0.6;
+  }
+
+  /* Terminal background styles */
+  .terminal-char {
+    color: #646464;
+    font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
+    font-size: 12px;
+    line-height: 1.2;
+  }
+
+  .dark .terminal-char {
+    color: #A7A7A7;
+  }
+
+  .terminal-glitch {
+    animation: glitch 0.3s ease-in-out;
+  }
+
+  @keyframes glitch {
+    0% { transform: translate(0); }
+    20% { transform: translate(-2px, 2px); }
+    40% { transform: translate(-2px, -2px); }
+    60% { transform: translate(2px, 2px); }
+    80% { transform: translate(2px, -2px); }
+    100% { transform: translate(0); }
+  }
+
+  /* Project card hover effects */
+  .project-card {
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+    transform-origin: center;
+  }
+
+  .project-card:hover {
+    transform: translateY(-8px) scale(1.02);
+  }
+
+  .project-card:hover .project-image {
+    transform: scale(1.1);
+  }
+
+  .project-image {
+    transition: transform 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  }
+
+  /* Button hover effects */
+  .btn-primary {
+    position: relative;
+    overflow: hidden;
+    transition: all 0.3s ease;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+    transition: left 0.5s;
+  }
+
+  .btn-primary:hover::before {
+    left: 100%;
+  }
+
+  /* Focus styles for accessibility */
+  :focus-visible {
+    outline: 2px solid rgb(232 80 2);
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  /* Text selection */
+  ::selection {
+    background: rgba(232, 80, 2, 0.3);
+    color: inherit;
+  }
+
+  /* Skip to content link */
+  .skip-to-content {
+    position: absolute;
+    top: -40px;
+    left: 6px;
+    background: rgb(232 80 2);
+    color: white;
+    padding: 8px 16px;
+    text-decoration: none;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    z-index: 100;
+    transition: top 0.3s;
+  }
+
+  .skip-to-content:focus {
+    top: 6px;
+  }
+
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background: rgb(232 80 2 / 0.5);
+    border-radius: 4px;
+  }
+
+  ::-webkit-scrollbar-thumb:hover {
+    background: rgb(232 80 2 / 0.7);
+  }
+}
