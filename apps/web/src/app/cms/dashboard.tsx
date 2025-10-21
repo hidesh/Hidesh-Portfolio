@@ -27,13 +27,13 @@ import {
 interface Post {
   id: string
   title: string
-  summary: string
-  body_mdx: string
+  excerpt: string
+  content: string
   tags: string[]
   published: boolean
   created_at: string
   updated_at: string
-  published_at?: string
+  slug?: string
 }
 
 interface AnalyticsData {
@@ -198,7 +198,7 @@ export default function CMSPage() {
 
   const fetchPosts = async () => {
     const { data, error } = await supabase
-      .from('projects')
+      .from('blog_posts')
       .select('*')
       .order('created_at', { ascending: false })
     
@@ -242,46 +242,69 @@ export default function CMSPage() {
   }
 
   const handleSavePost = async () => {
+    // Generate slug from title
+    const slug = title.toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/(^-|-$)/g, '')
+
     const postData = {
       title,
-      summary,
-      body_mdx: content,
+      excerpt: summary,
+      content,
       tags: tags.split(',').map(tag => tag.trim()),
       published: isPublished,
+      slug: slug,
       updated_at: new Date().toISOString(),
     }
 
-    if (editingPost) {
-      const { error } = await supabase
-        .from('projects')
-        .update(postData)
-        .eq('id', editingPost.id)
-      
-      if (!error) {
-        fetchPosts()
-        resetEditor()
+    try {
+      if (editingPost) {
+        const { error } = await supabase
+          .from('blog_posts')
+          .update(postData)
+          .eq('id', editingPost.id)
+        
+        if (error) {
+          console.error('Error updating post:', error)
+          alert('Error updating post: ' + error.message)
+        } else {
+          fetchPosts()
+          resetEditor()
+          alert('Post updated successfully!')
+        }
+      } else {
+        const { error } = await supabase
+          .from('blog_posts')
+          .insert([{ ...postData, created_at: new Date().toISOString() }])
+        
+        if (error) {
+          console.error('Error creating post:', error)
+          alert('Error creating post: ' + error.message)
+        } else {
+          fetchPosts()
+          resetEditor()
+          alert('Post created successfully!')
+        }
       }
-    } else {
-      const { error } = await supabase
-        .from('projects')
-        .insert([{ ...postData, created_at: new Date().toISOString() }])
-      
-      if (!error) {
-        fetchPosts()
-        resetEditor()
-      }
+    } catch (err) {
+      console.error('Unexpected error:', err)
+      alert('An unexpected error occurred')
     }
   }
 
   const handleDeletePost = async (id: string) => {
     if (confirm('Are you sure you want to delete this post?')) {
       const { error } = await supabase
-        .from('projects')
+        .from('blog_posts')
         .delete()
         .eq('id', id)
       
-      if (!error) {
+      if (error) {
+        console.error('Error deleting post:', error)
+        alert('Error deleting post: ' + error.message)
+      } else {
         fetchPosts()
+        alert('Post deleted successfully!')
       }
     }
   }
@@ -289,8 +312,8 @@ export default function CMSPage() {
   const handleEditPost = (post: Post) => {
     setEditingPost(post)
     setTitle(post.title)
-    setSummary(post.summary)
-    setContent(post.body_mdx)
+    setSummary(post.excerpt || '')
+    setContent(post.content || '')
     setTags(post.tags?.join(', ') || '')
     setIsPublished(post.published)
     setShowEditor(true)
@@ -372,7 +395,7 @@ export default function CMSPage() {
                       <div className="flex items-start justify-between">
                         <div className="flex-1">
                           <h3 className="font-semibold text-foreground text-xs mb-0.5">{post.title}</h3>
-                          <p className="text-muted-foreground text-xs mb-0.5 line-clamp-1">{post.summary}</p>
+                          <p className="text-muted-foreground text-xs mb-0.5 line-clamp-1">{post.excerpt}</p>
                           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                             <span className="px-1 py-0.5 rounded-full text-xs bg-muted text-foreground">
                               {post.published ? 'Published' : 'Draft'}
@@ -482,7 +505,7 @@ export default function CMSPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Summary</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Excerpt</label>
                 <textarea
                   value={summary}
                   onChange={(e) => setSummary(e.target.value)}
@@ -493,13 +516,13 @@ export default function CMSPage() {
               </div>
               
               <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Content (MDX)</label>
+                <label className="block text-sm font-medium text-foreground mb-1">Content</label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
                   rows={8}
                   className="w-full px-3 py-2 border border-border rounded bg-background text-foreground font-mono text-sm"
-                  placeholder="Write your post content in MDX format..."
+                  placeholder="Write your post content..."
                 />
               </div>
               
