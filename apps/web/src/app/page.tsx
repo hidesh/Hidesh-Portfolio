@@ -1,16 +1,63 @@
 import ScrollStack from '@/components/ui/scroll-stack'
 import ThemeBackground from '@/components/ui/theme-background'
-import { getProjects } from '@/lib/supabase/queries'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
+
+interface Project {
+  id: string
+  title: string
+  summary: string
+  tags: string[]
+  cover_image: string | null
+  live_url: string | null
+  repo_url: string | null
+}
 
 export const metadata: Metadata = {
   title: 'Hidesh Kumar - Software Engineer',
   description: 'Software Engineer passionate about building exceptional digital experiences with modern technologies. Specializing in React, Next.js, TypeScript, and cloud architecture.',
 }
 
-export default async function Home() {
-  const projects = await getProjects()
+export default function Home() {
+  // Hardcoded projects - no database needed
+  const projects = [
+    {
+      id: '1',
+      title: 'AI Chat Assistant',
+      summary: 'Intelligent chat assistant powered by OpenAI GPT-4 with real-time responses and context awareness.',
+      tags: ['React', 'Next.js', 'OpenAI', 'TypeScript', 'Tailwind CSS'],
+      cover_image: null,
+      live_url: 'https://chat-demo.hidesh.com',
+      repo_url: 'https://github.com/hidesh/ai-chat-assistant'
+    },
+    {
+      id: '2', 
+      title: 'E-commerce Platform',
+      summary: 'Full-stack e-commerce solution with payment integration, inventory management, and admin dashboard.',
+      tags: ['Next.js', 'Supabase', 'Stripe', 'PostgreSQL', 'Tailwind CSS'],
+      cover_image: null,
+      live_url: 'https://shop-demo.hidesh.com',
+      repo_url: 'https://github.com/hidesh/ecommerce-platform'
+    },
+    {
+      id: '3',
+      title: 'Task Management App', 
+      summary: 'Collaborative project management tool with real-time updates, team collaboration, and analytics.',
+      tags: ['React', 'Firebase', 'Material-UI', 'Node.js', 'Express'],
+      cover_image: null,
+      live_url: 'https://tasks-demo.hidesh.com',
+      repo_url: 'https://github.com/hidesh/task-manager'
+    },
+    {
+      id: '4',
+      title: 'Portfolio Website',
+      summary: 'Modern portfolio website with CMS integration, blog functionality, and analytics dashboard.',
+      tags: ['Next.js', 'Supabase', 'TypeScript', 'Tailwind CSS', 'Vercel'],
+      cover_image: null,
+      live_url: 'https://hidesh.com',
+      repo_url: 'https://github.com/hidesh/portfolio'
+    }
+  ]
 
   // Mock skills data til vi får en rigtig getSkills funktion
   const skillCategories = [
