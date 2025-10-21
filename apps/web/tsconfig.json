@@ -23,6 +23,6 @@
       "@repo/*": ["../../packages/*/src"]
     }
   },
-  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "**/*.mdx"],
+  "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts", "**/*.mdx", "src/types/**/*.d.ts"],
   "exclude": ["node_modules"]
 }
