@@ -14,19 +14,20 @@ export const metadata: Metadata = {
 interface BlogPost {
   id: string;
   title: string;
-  summary: string;
+  excerpt: string;
   content: string;
   tags: string[];
   published: boolean;
   created_at: string;
   updated_at: string;
+  slug: string;
 }
 
 async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('projects') // We're using the projects table for blog posts
+      .from('blog_posts')
       .select('*')
       .eq('published', true)
       .order('created_at', { ascending: false });
@@ -78,12 +79,12 @@ export default async function BlogPage() {
                   <div className="flex items-start justify-between">
                     <div className="flex-1">
                       <h2 className="text-2xl font-semibold text-foreground hover:text-branding-600 transition-colors">
-                        <Link href={`/blog/${post.id}`}>
+                        <Link href={`/blog/${post.slug}`}>
                           {post.title}
                         </Link>
                       </h2>
                       <p className="text-muted-foreground mt-2 line-clamp-3">
-                        {post.summary}
+                        {post.excerpt}
                       </p>
                     </div>
                   </div>
@@ -109,7 +110,7 @@ export default async function BlogPage() {
                   </div>
 
                   <Link
-                    href={`/blog/${post.id}`}
+                    href={`/blog/${post.slug}`}
                     className="text-branding-600 hover:text-branding-700 font-medium text-sm transition-colors"
                   >
                     Read more →

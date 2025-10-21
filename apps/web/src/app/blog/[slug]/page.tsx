@@ -7,27 +7,28 @@ import { ArrowLeft } from 'lucide-react';
 interface BlogPost {
   id: string;
   title: string;
-  summary: string;
+  excerpt: string;
   content: string;
   tags: string[];
   published: boolean;
   created_at: string;
   updated_at: string;
+  slug: string;
 }
 
 interface PageProps {
   params: Promise<{
-    id: string;
+    slug: string;
   }>;
 }
 
-async function getBlogPost(id: string): Promise<BlogPost | null> {
+async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('projects')
+      .from('blog_posts')
       .select('*')
-      .eq('id', id)
+      .eq('slug', slug)
       .eq('published', true)
       .single();
 
@@ -44,7 +45,7 @@ async function getBlogPost(id: string): Promise<BlogPost | null> {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const resolvedParams = await params;
-  const post = await getBlogPost(resolvedParams.id);
+  const post = await getBlogPost(resolvedParams.slug);
 
   if (!post) {
     return {
@@ -54,10 +55,10 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
   return {
     title: `${post.title} - Hidesh Kumar`,
-    description: post.summary,
+    description: post.excerpt,
     openGraph: {
       title: post.title,
-      description: post.summary,
+      description: post.excerpt,
       type: 'article',
       publishedTime: post.created_at,
       modifiedTime: post.updated_at,
@@ -67,7 +68,7 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default async function BlogPostPage({ params }: PageProps) {
   const resolvedParams = await params;
-  const post = await getBlogPost(resolvedParams.id);
+  const post = await getBlogPost(resolvedParams.slug);
 
   if (!post) {
     notFound();
@@ -111,9 +112,9 @@ export default async function BlogPostPage({ params }: PageProps) {
               </div>
             </div>
 
-            {post.summary && (
+            {post.excerpt && (
               <p className="text-xl text-muted-foreground leading-relaxed border-l-4 border-branding-500 pl-6 mb-8">
-                {post.summary}
+                {post.excerpt}
               </p>
             )}
           </header>
