@@ -225,21 +225,21 @@ export default function ScrollStack({ categories }: ScrollStackProps) {
                         animation: 'fade-in 0.6s ease-out forwards'
                       }}
                     >
-                      <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 border border-white/20 hover:bg-white/20 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
+                      <div className="skill-card-content backdrop-blur-sm rounded-lg p-4 transition-all duration-300 group-hover:scale-105 group-hover:shadow-lg">
                         <div className="flex flex-col items-center space-y-2">
                           {/* Icon */}
                           <div className="text-3xl">
-                            {skillIcons[skill] || <FaCode className="text-white" />}
+                            {skillIcons[skill] || <FaCode className="skill-text" />}
                           </div>
                           {/* Text underneath */}
-                          <div className="text-white font-medium text-xs text-center leading-tight">
+                          <div className="skill-text font-medium text-xs text-center leading-tight">
                             {skill}
                           </div>
                         </div>
                       </div>
                       
                       {/* Hover glow effect */}
-                      <div className="absolute inset-0 rounded-lg bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
+                      <div className="absolute inset-0 rounded-lg skill-hover-glow opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </div>
                   ))}
                 </div>

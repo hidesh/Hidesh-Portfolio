@@ -1,0 +1,104 @@
+# Page snapshot
+
+```yaml
+- generic [active] [ref=e1]:
+  - link "Skip to content" [ref=e2] [cursor=pointer]:
+    - /url: "#main-content"
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "Hidesh Kumar Hidesh Kumar" [ref=e6] [cursor=pointer]:
+          - /url: /
+          - img "Hidesh Kumar" [ref=e8]
+          - text: Hidesh Kumar
+        - generic [ref=e9]:
+          - link "Home" [ref=e10] [cursor=pointer]:
+            - /url: /#home
+          - link "Skills" [ref=e11] [cursor=pointer]:
+            - /url: /#skills
+          - link "Projects" [ref=e12] [cursor=pointer]:
+            - /url: /#projects
+          - link "About" [ref=e13] [cursor=pointer]:
+            - /url: /#about
+          - link "Blog" [ref=e14] [cursor=pointer]:
+            - /url: /blog
+          - link "Contact" [ref=e15] [cursor=pointer]:
+            - /url: /#contact
+        - generic [ref=e16]:
+          - link "GitHub" [ref=e17] [cursor=pointer]:
+            - /url: https://github.com/hidesh
+            - img [ref=e18]
+          - link "LinkedIn" [ref=e21] [cursor=pointer]:
+            - /url: https://linkedin.com/in/hidesh
+            - img [ref=e22]
+          - link "Email" [ref=e26] [cursor=pointer]:
+            - /url: mailto:hidesh@live.dk
+            - img [ref=e27]
+          - button "Toggle theme" [ref=e30]:
+            - img [ref=e31]
+            - img [ref=e37]
+        - generic [ref=e39]:
+          - button "Toggle theme" [ref=e40]:
+            - img [ref=e41]
+            - img [ref=e47]
+          - button "Toggle mobile menu" [ref=e49]:
+            - img [ref=e50]
+  - main [ref=e51]:
+    - generic [ref=e53]:
+      - heading "404" [level=1] [ref=e54]
+      - heading "This page could not be found." [level=2] [ref=e56]
+  - contentinfo [ref=e57]:
+    - generic [ref=e58]:
+      - generic [ref=e59]:
+        - generic [ref=e60]:
+          - generic [ref=e61]:
+            - generic [ref=e62]: HK
+            - text: Hidesh Kumar
+          - paragraph [ref=e63]: Software Engineer passionate about building exceptional digital experiences with modern technologies.
+          - generic [ref=e64]:
+            - link "GitHub" [ref=e65] [cursor=pointer]:
+              - /url: https://github.com/hidesh
+              - img [ref=e66]
+            - link "LinkedIn" [ref=e69] [cursor=pointer]:
+              - /url: https://linkedin.com/in/hidesh
+              - img [ref=e70]
+            - link "Email" [ref=e74] [cursor=pointer]:
+              - /url: mailto:hidesh@live.dk
+              - img [ref=e75]
+        - generic [ref=e78]:
+          - heading "Quick Links" [level=3] [ref=e79]
+          - list [ref=e80]:
+            - listitem [ref=e81]:
+              - link "Home" [ref=e82] [cursor=pointer]:
+                - /url: "#home"
+            - listitem [ref=e83]:
+              - link "Skills" [ref=e84] [cursor=pointer]:
+                - /url: "#skills"
+            - listitem [ref=e85]:
+              - link "Projects" [ref=e86] [cursor=pointer]:
+                - /url: "#projects"
+            - listitem [ref=e87]:
+              - link "About" [ref=e88] [cursor=pointer]:
+                - /url: "#about"
+            - listitem [ref=e89]:
+              - link "Contact" [ref=e90] [cursor=pointer]:
+                - /url: "#contact"
+        - generic [ref=e91]:
+          - heading "Get In Touch" [level=3] [ref=e92]
+          - generic [ref=e93]:
+            - generic [ref=e94]:
+              - img [ref=e95]
+              - link "hidesh@live.dk" [ref=e98] [cursor=pointer]:
+                - /url: mailto:hidesh@live.dk
+            - generic [ref=e99]:
+              - img [ref=e100]
+              - link "hidesh.com" [ref=e104] [cursor=pointer]:
+                - /url: https://hidesh.com
+      - generic [ref=e106]:
+        - paragraph [ref=e107]: © 2025 Hidesh Kumar. All rights reserved.
+        - generic [ref=e108]:
+          - link "Privacy Policy" [ref=e109] [cursor=pointer]:
+            - /url: "#privacy"
+          - link "Terms of Service" [ref=e110] [cursor=pointer]:
+            - /url: "#terms"
+```

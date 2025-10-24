@@ -1,5 +1,8 @@
+import { Suspense } from 'react'
 import ScrollStack from '@/components/ui/scroll-stack'
 import ThemeBackground from '@/components/ui/theme-background'
+import { ErrorBoundary } from '@/components/ui/error-boundary'
+import SafeImage from '@/components/ui/safe-image'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -117,16 +120,27 @@ export default function Home() {
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Hero Section */}
       <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-32">
-        <ThemeBackground />
+        <ErrorBoundary fallback={<div className="fixed inset-0 bg-gradient-to-br from-orange-50/10 to-transparent pointer-events-none z-0" />}>
+          <Suspense fallback={<div className="fixed inset-0 bg-gradient-to-br from-orange-50/10 to-transparent pointer-events-none z-0" />}>
+            <ThemeBackground />
+          </Suspense>
+        </ErrorBoundary>
         <div className="container mx-auto text-center relative z-20">
-          {/* Profile Image Placeholder */}
+          {/* Profile Image */}
           <div className="mb-8 flex justify-center">
             <div className="relative">
               <div className="h-32 w-32 md:h-40 md:w-40 rounded-full bg-gradient-to-br from-branding-500 via-branding-600 to-branding-800 p-1 animate-pulse-slow">
-                <div className="h-full w-full rounded-full bg-muted flex items-center justify-center">
-                  <span className="text-4xl md:text-5xl font-bold text-gradient">
-                    HK
-                  </span>
+                <div className="h-full w-full rounded-full overflow-hidden">
+                  <ErrorBoundary fallback={<div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">HK</div>}>
+                    <SafeImage
+                      src="/Hidesh-profile.png"
+                      alt="Hidesh Kumar"
+                      width={160}
+                      height={160}
+                      className="w-full h-full object-cover"
+                      priority
+                    />
+                  </ErrorBoundary>
                 </div>
               </div>
               <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-branding-500 via-branding-600 to-branding-800 opacity-30 blur-lg animate-pulse-slow"></div>
@@ -314,7 +328,11 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
             Skills & Technologies
           </h2>
-          <ScrollStack categories={skillCategories} />
+          <ErrorBoundary fallback={<div className="text-center text-muted-foreground">Loading skills...</div>}>
+            <Suspense fallback={<div className="text-center text-muted-foreground">Loading skills...</div>}>
+              <ScrollStack categories={skillCategories} />
+            </Suspense>
+          </ErrorBoundary>
         </div>
       </section>
 

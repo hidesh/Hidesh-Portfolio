@@ -1,0 +1,261 @@
+name: 🚀 Portfolio CI/CD Pipeline
+
+on:
+  push:
+    branches: [main, develop]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  NODE_VERSION: '20'
+  PNPM_VERSION: '8'
+
+jobs:
+  # ===================================
+  # SECURITY & VALIDATION
+  # ===================================
+  security-check:
+    name: 🔒 Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🔍 Scan for secrets
+        uses: trufflesecurity/trufflehog@main
+        with:
+          path: ./
+          base: main
+          head: HEAD
+
+      - name: 🛡️ Run security audit
+        run: |
+          # Check for hardcoded secrets
+          if grep -r "eyJ" --exclude-dir=node_modules --exclude="*.md" .; then
+            echo "❌ Potential JWT tokens found in code!"
+            exit 1
+          fi
+          
+          # Check for API keys
+          if grep -r "sk-" --exclude-dir=node_modules --exclude="*.md" .; then
+            echo "❌ Potential API keys found in code!"
+            exit 1
+          fi
+          
+          # Check for placeholder values in production files
+          if grep -r "your_.*_here" --exclude-dir=node_modules --exclude="*.example" --exclude="*.md" .; then
+            echo "❌ Placeholder values found in production files!"
+            exit 1
+          fi
+          
+          echo "✅ Security scan passed"
+
+  # ===================================
+  # QUALITY CHECKS
+  # ===================================
+  quality-check:
+    name: 🧪 Quality Assurance
+    runs-on: ubuntu-latest
+    needs: [security-check]
+    
+    strategy:
+      matrix:
+        node-version: [18, 20]
+        
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js ${{ matrix.node-version }}
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 📋 Get pnpm store directory
+        id: pnpm-cache
+        shell: bash
+        run: echo "STORE_PATH=$(pnpm store path)" >> $GITHUB_OUTPUT
+
+      - name: ⚡ Cache pnpm dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.pnpm-cache.outputs.STORE_PATH }}
+          key: ${{ runner.os }}-pnpm-store-${{ hashFiles('**/pnpm-lock.yaml') }}
+          restore-keys: |
+            ${{ runner.os }}-pnpm-store-
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🔍 Lint code
+        run: pnpm lint
+
+      - name: 🎨 Check code formatting
+        run: pnpm format:check
+
+      - name: 🔧 Type check
+        run: pnpm type-check
+
+      - name: 🏗️ Build application
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
+        run: pnpm build
+
+  # ===================================
+  # TESTING SUITE
+  # ===================================
+  test:
+    name: 🧪 Test Suite
+    runs-on: ubuntu-latest
+    needs: [security-check]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🧪 Run unit tests
+        run: pnpm test
+
+      - name: 🎭 Run E2E tests
+        run: pnpm test:e2e
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
+
+      - name: 📊 Upload test coverage
+        uses: codecov/codecov-action@v3
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          files: ./coverage/lcov.info
+
+  # ===================================
+  # PERFORMANCE & LIGHTHOUSE
+  # ===================================
+  performance:
+    name: ⚡ Performance Audit
+    runs-on: ubuntu-latest
+    needs: [quality-check]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🟢 Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+
+      - name: 📦 Setup pnpm
+        uses: pnpm/action-setup@v2
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - name: 📦 Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: 🏗️ Build for performance test
+        env:
+          NEXT_PUBLIC_SUPABASE_URL: ${{ secrets.NEXT_PUBLIC_SUPABASE_URL }}
+          NEXT_PUBLIC_SUPABASE_ANON_KEY: ${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }}
+          NEXT_PUBLIC_CLARITY_PROJECT_ID: ${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}
+        run: pnpm build
+
+      - name: 🏃‍♂️ Start application
+        run: pnpm start &
+        env:
+          PORT: 3000
+
+      - name: 📊 Run Lighthouse CI
+        uses: treosh/lighthouse-ci-action@v10
+        with:
+          configPath: './lighthouse.config.js'
+          uploadArtifacts: true
+          temporaryPublicStorage: true
+
+  # ===================================
+  # DEPLOYMENT TO VERCEL
+  # ===================================
+  deploy-preview:
+    name: 🚀 Deploy Preview
+    runs-on: ubuntu-latest
+    needs: [quality-check, test]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Vercel (Preview)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--env NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} --env NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} --env NEXT_PUBLIC_CLARITY_PROJECT_ID=${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}'
+
+  deploy-production:
+    name: 🌟 Deploy Production
+    runs-on: ubuntu-latest
+    needs: [quality-check, test, performance]
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+    
+    environment: production
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v4
+
+      - name: 🚀 Deploy to Vercel (Production)
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          vercel-args: '--prod --env NEXT_PUBLIC_SUPABASE_URL=${{ secrets.NEXT_PUBLIC_SUPABASE_URL }} --env NEXT_PUBLIC_SUPABASE_ANON_KEY=${{ secrets.NEXT_PUBLIC_SUPABASE_ANON_KEY }} --env NEXT_PUBLIC_CLARITY_PROJECT_ID=${{ secrets.NEXT_PUBLIC_CLARITY_PROJECT_ID }}'
+
+      - name: 📧 Notify deployment success
+        if: success()
+        run: |
+          echo "🎉 Deployment successful!"
+          echo "🌐 Site is live at: https://your-domain.vercel.app"
+
+  # ===================================
+  # CLEANUP & NOTIFICATIONS
+  # ===================================
+  cleanup:
+    name: 🧹 Cleanup
+    runs-on: ubuntu-latest
+    needs: [deploy-production, deploy-preview]
+    if: always()
+    
+    steps:
+      - name: 🧹 Cleanup old deployments
+        run: echo "Cleanup completed"
+
+      - name: 📊 Report status
+        if: failure()
+        run: |
+          echo "❌ Pipeline failed!"
+          echo "Please check the logs above for details."

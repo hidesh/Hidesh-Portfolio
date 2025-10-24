@@ -8,12 +8,13 @@ interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
-  content: string;
+  body_mdx: string;
   tags: string[];
-  published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
   slug: string;
+  cover_image?: string;
 }
 
 interface PageProps {
@@ -26,10 +27,9 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('posts')
       .select('*')
       .eq('slug', slug)
-      .eq('published', true)
       .single();
 
     if (error || !data) {
@@ -122,7 +122,7 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="text-foreground leading-relaxed">
             {/* For now, render content as text. In a real app, you'd use a markdown parser */}
             <div className="whitespace-pre-wrap">
-              {post.content}
+              {post.body_mdx}
             </div>
           </div>
         </article>

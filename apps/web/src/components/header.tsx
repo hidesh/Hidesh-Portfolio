@@ -1,16 +1,19 @@
 'use client'
 
 import { useState, useEffect } from 'react'
+
+import Link from 'next/link'
+import Image from 'next/image'
 import { Menu, X, Github, Linkedin, Mail } from 'lucide-react'
 import { ThemeToggle } from './ui/theme-toggle'
 
 const navigation = [
-  { name: 'Home', href: '#home' },
-  { name: 'Skills', href: '#skills' },
-  { name: 'Projects', href: '#projects' },
-  { name: 'About', href: '#about' },
+  { name: 'Home', href: '/#home' },
+  { name: 'Skills', href: '/#skills' },
+  { name: 'Projects', href: '/#projects' },
+  { name: 'About', href: '/#about' },
   { name: 'Blog', href: '/blog' },
-  { name: 'Contact', href: '#contact' },
+  { name: 'Contact', href: '/#contact' },
 ]
 
 const socialLinks = [
@@ -49,26 +52,34 @@ export function Header() {
         <nav className="container mx-auto px-6 py-4 relative z-10">
           <div className="flex items-center justify-between">
             {/* Logo */}
-            <div className="flex items-center space-x-2">
-              <div className="h-10 w-10 rounded-lg bg-gradient-to-br from-branding-600 to-branding-800 flex items-center justify-center">
-                <span className="text-white font-bold text-lg">HK</span>
+            <Link href="/" className="flex items-center space-x-2">
+              <div className="h-10 w-10 rounded-lg overflow-hidden border-2 border-branding-600/20">
+                <Image
+                  src="/Hidesh-profile.png"
+                  alt="Hidesh Kumar"
+                  width={40}
+                  height={40}
+                  className="w-full h-full object-cover"
+                  priority
+                  unoptimized
+                />
               </div>
               <span className="text-xl font-bold text-gradient">
                 Hidesh Kumar
               </span>
-            </div>
+            </Link>
 
             {/* Desktop Navigation */}
             <div className="hidden lg:flex items-center space-x-8">
               {navigation.map((item) => (
-                <a
+                <Link
                   key={item.name}
                   href={item.href}
                   className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 font-medium"
                   onClick={() => setIsMobileMenuOpen(false)}
                 >
                   {item.name}
-                </a>
+                </Link>
               ))}
             </div>
 
@@ -115,14 +126,14 @@ export function Header() {
               <div className="bg-muted/90 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-6">
                 <div className="space-y-4">
                   {navigation.map((item) => (
-                    <a
+                    <Link
                       key={item.name}
                       href={item.href}
                       className="block text-muted-foreground hover:text-branding-600 transition-colors duration-200 font-medium text-lg"
                       onClick={() => setIsMobileMenuOpen(false)}
                     >
                       {item.name}
-                    </a>
+                    </Link>
                   ))}
                 </div>
                 

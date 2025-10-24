@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
+import Link from 'next/link'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
@@ -20,25 +21,22 @@ export default function LoginPage() {
     setError('')
 
     try {
-      // Dummy credentials check for now
-      if (email === 'hidesh@live.dk' && password === 'Test123!') {
-        // Set a cookie for authentication that middleware can read
-        document.cookie = 'dummyAuth=true; path=/; max-age=86400' // 24 hours
-        router.push('/cms')
-        return
-      }
-
-      // If not dummy credentials, try Supabase auth
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
       })
 
-      if (error) throw error
+      if (error) {
+        throw new Error(error.message)
+      }
 
-      router.push('/cms')
-    } catch (error: any) {
-      setError('Invalid email or password. Try: hidesh@live.dk / Test123!')
+      // Get redirect URL from search params or default to /cms
+      const urlParams = new URLSearchParams(window.location.search)
+      const redirectTo = urlParams.get('redirectedFrom') || '/cms'
+      router.push(redirectTo)
+    } catch (error: unknown) {
+      const errorMessage = error instanceof Error ? error.message : 'Login failed'
+      setError(errorMessage)
     } finally {
       setLoading(false)
     }
@@ -55,13 +53,6 @@ export default function LoginPage() {
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">Admin Login</h1>
             <p className="text-muted-foreground">Sign in to access the CMS dashboard</p>
-            <div className="mt-4 p-3 bg-branding-50 dark:bg-branding-900/20 rounded-lg border border-branding-200 dark:border-branding-800">
-              <p className="text-xs text-branding-700 dark:text-branding-300 text-center">
-                <strong>Demo Login:</strong><br />
-                Email: hidesh@live.dk<br />
-                Password: Test123!
-              </p>
-            </div>
           </div>
 
           {/* Error Message */}
@@ -130,12 +121,12 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <a 
+            <Link 
               href="/"
               className="text-sm text-muted-foreground hover:text-branding-600 transition-colors"
             >
               ← Back to Portfolio
-            </a>
+            </Link>
           </div>
         </div>
       </div>

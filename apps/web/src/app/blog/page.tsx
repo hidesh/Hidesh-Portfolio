@@ -15,21 +15,21 @@ interface BlogPost {
   id: string;
   title: string;
   excerpt: string;
-  content: string;
+  body_mdx: string;
   tags: string[];
-  published: boolean;
+  published_at: string | null;
   created_at: string;
   updated_at: string;
   slug: string;
+  cover_image?: string;
 }
 
 async function getBlogPosts(): Promise<BlogPost[]> {
   try {
     const supabase = await createClient();
     const { data, error } = await supabase
-      .from('blog_posts')
+      .from('posts')
       .select('*')
-      .eq('published', true)
       .order('created_at', { ascending: false });
 
     if (error) {

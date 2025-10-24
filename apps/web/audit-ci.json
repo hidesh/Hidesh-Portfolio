@@ -1,0 +1,11 @@
+{
+  "low": true,
+  "moderate": false,
+  "high": false,
+  "critical": false,
+  "allowlist": [
+    "GHSA-c2qf-rxjj-qqgw"
+  ],
+  "report-type": "full",
+  "output-format": "json"
+}

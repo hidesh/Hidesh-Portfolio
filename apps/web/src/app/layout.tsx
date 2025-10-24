@@ -3,6 +3,7 @@
 import { Inter } from 'next/font/google';
 import { usePathname } from 'next/navigation';
 import { ThemeProvider } from '@/components/theme-provider';
+import { ClarityProvider } from '@/components/clarity-provider';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 
@@ -25,11 +26,13 @@ export default function RootLayout({
     <html lang="en" className={inter.variable} suppressHydrationWarning>
       <body className={`${inter.className} min-h-screen bg-background font-sans antialiased ${isCMSRoute ? '' : 'flex flex-col'}`}>
         <ThemeProvider>
-          {!isCMSRoute && <Header />}
-          <main id="main-content" className={isCMSRoute ? '' : 'flex-1'}>
-            {children}
-          </main>
-          {!isCMSRoute && <Footer />}
+          <ClarityProvider>
+            {!isCMSRoute && <Header />}
+            <main id="main-content" className={isCMSRoute ? '' : 'flex-1'}>
+              {children}
+            </main>
+            {!isCMSRoute && <Footer />}
+          </ClarityProvider>
         </ThemeProvider>
       </body>
     </html>

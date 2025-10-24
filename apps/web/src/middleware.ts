@@ -14,19 +14,19 @@ export async function updateSession(request: NextRequest) {
         get(name: string) {
           return request.cookies.get(name)?.value;
         },
-        set(name: string, value: string, options: any) {
+        set(name: string, value: string, options?: { path?: string; maxAge?: number; secure?: boolean; httpOnly?: boolean; sameSite?: 'strict' | 'lax' | 'none' }) {
           request.cookies.set({ name, value, ...options });
           supabaseResponse = NextResponse.next({
             request,
           });
           supabaseResponse.cookies.set({ name, value, ...options });
         },
-        remove(name: string, options: any) {
-          request.cookies.delete({ name, ...options });
+        remove(name: string) {
+          request.cookies.delete(name);
           supabaseResponse = NextResponse.next({
             request,
           });
-          supabaseResponse.cookies.delete({ name, ...options });
+          supabaseResponse.cookies.delete(name);
         },
       },
     }
@@ -38,10 +38,7 @@ export async function updateSession(request: NextRequest) {
 
   // Protect CMS routes
   if (request.nextUrl.pathname.startsWith('/cms')) {
-    // Check for dummy auth cookie first
-    const isDummyAuth = request.cookies.get('dummyAuth')?.value === 'true'
-    
-    if (!user && !isDummyAuth) {
+    if (!user) {
       const url = request.nextUrl.clone();
       url.pathname = '/login';
       url.searchParams.set('redirectedFrom', request.nextUrl.pathname);
@@ -50,7 +47,7 @@ export async function updateSession(request: NextRequest) {
   }
 
   // Redirect logged-in users away from login page
-  if (request.nextUrl.pathname === '/login' && (user || request.cookies.get('dummyAuth')?.value === 'true')) {
+  if (request.nextUrl.pathname === '/login' && user) {
     const url = request.nextUrl.clone();
     url.pathname = '/cms';
     return NextResponse.redirect(url);

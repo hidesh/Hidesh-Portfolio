@@ -1,18 +1,57 @@
+# Dependencies
 node_modules
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Build outputs
 .next
 .turbo
 dist
 build
+out
+.cache
+
+# Environment variables - CRITICAL SECURITY
+.env
 .env*.local
+.env.production
+.env.development
+.env.staging
+
+# Sensitive files
+*.key
+*.pem
+*.p12
+*.pfx
+secrets.json
+config.json
+
+# Development
 .DS_Store
 *.log
-.vercel
-coverage
-.nyc_output
-*.tsbuildinfo
-.cache
 .vscode/settings.json
 .idea
 *.swp
 *.swo
 *~
+
+# Deployment
+.vercel
+.netlify
+
+# Testing
+coverage
+.nyc_output
+*.tsbuildinfo
+
+# Database
+*.sqlite
+*.db
+
+# Temporary files
+tmp
+temp
+*.tmp
+*.temp

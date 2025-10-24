@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
+import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
 import { 
   Plus, 
   Edit3, 
@@ -28,23 +29,17 @@ interface Post {
   id: string
   title: string
   excerpt: string
-  content: string
+  body_mdx: string
   tags: string[]
-  published: boolean
+  published_at: string | null
   created_at: string
   updated_at: string
-  slug?: string
+  slug: string
+  cover_image?: string
+  author_id?: string
 }
 
-interface AnalyticsData {
-  totalViews: number
-  uniqueVisitors: number
-  topPages: Array<{ page: string; views: number }>
-  topCountries: Array<{ country: string; visitors: number }>
-  deviceTypes: Array<{ type: string; count: number }>
-  recentEvents: any[]
-  dailyViews: Array<{ date: string; views: number }>
-}
+
 
 // Sidebar Navigation Component
 function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSidebarOpen, user }: {
@@ -156,7 +151,7 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
 export default function CMSPage() {
   const [user, setUser] = useState<any>(null)
   const [posts, setPosts] = useState<Post[]>([])
-  const [analyticsData, setAnalyticsData] = useState<AnalyticsData | null>(null)
+
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
@@ -174,13 +169,21 @@ export default function CMSPage() {
   const [isPublished, setIsPublished] = useState(false)
 
   useEffect(() => {
-    checkUser()
-    if (activeTab === 'posts') {
-      fetchPosts()
-    } else {
-      fetchAnalytics()
+    const initDashboard = async () => {
+      try {
+        await checkUser()
+        await fetchPosts()  
+      } catch (error) {
+        console.error('Dashboard error:', error)
+      } finally {
+        setLoading(false)
+      }
     }
-  }, [activeTab])
+    
+    initDashboard()
+  }, [])
+  
+
 
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
@@ -193,47 +196,24 @@ export default function CMSPage() {
     } else {
       setUser(user || { email: 'hidesh@live.dk' })
     }
-    setLoading(false)
+    // Loading will be set to false after all data is fetched
   }
 
   const fetchPosts = async () => {
-    const { data, error } = await supabase
-      .from('blog_posts')
-      .select('*')
-      .order('created_at', { ascending: false })
-    
-    if (data) setPosts(data as Post[])
-  }
-
-  const fetchAnalytics = async () => {
     try {
-      setAnalyticsData({
-        totalViews: 1247,
-        uniqueVisitors: 892,
-        topPages: [
-          { page: '/', views: 456 },
-          { page: '/projects', views: 289 },
-          { page: '/about', views: 178 },
-          { page: '/contact', views: 124 }
-        ],
-        topCountries: [
-          { country: 'Denmark', visitors: 234 },
-          { country: 'United States', visitors: 187 },
-          { country: 'Germany', visitors: 145 },
-          { country: 'United Kingdom', visitors: 98 }
-        ],
-        deviceTypes: [
-          { type: 'Desktop', count: 562 },
-          { type: 'Mobile', count: 485 },
-          { type: 'Tablet', count: 200 }
-        ],
-        recentEvents: [],
-        dailyViews: [],
-      });
+      const response = await fetch('/api/posts')
+      if (response.ok) {
+        const data = await response.json()
+        setPosts(data as Post[])
+      } else {
+        console.error('Failed to fetch posts:', response.status)
+      }
     } catch (error) {
-      console.error('Failed to fetch analytics:', error);
+      console.error('Error fetching posts:', error)
     }
   }
+
+
 
   const handleSignOut = async () => {
     document.cookie = 'dummyAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
@@ -242,48 +222,71 @@ export default function CMSPage() {
   }
 
   const handleSavePost = async () => {
+    // Validation - ensure required fields are not empty
+    if (!title.trim()) {
+      alert('Title is required')
+      return
+    }
+    
+    if (!summary.trim()) {
+      alert('Excerpt is required')
+      return
+    }
+    
+    if (!content.trim()) {
+      alert('Content is required')
+      return
+    }
+
     // Generate slug from title
     const slug = title.toLowerCase()
       .replace(/[^a-z0-9]+/g, '-')
       .replace(/(^-|-$)/g, '')
 
+    // Map to posts table structure
     const postData = {
-      title,
-      excerpt: summary,
-      content,
-      tags: tags.split(',').map(tag => tag.trim()),
-      published: isPublished,
+      title: title.trim(),
+      excerpt: summary.trim(),
+      body_mdx: content.trim(),  // posts table uses 'body_mdx'
+      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
+      published_at: isPublished ? new Date().toISOString() : null,  // posts table uses 'published_at'
       slug: slug,
-      updated_at: new Date().toISOString(),
     }
 
     try {
       if (editingPost) {
-        const { error } = await supabase
-          .from('blog_posts')
-          .update(postData)
-          .eq('id', editingPost.id)
+        // For updates, include the ID in the data
+        const updateData = { ...postData, id: editingPost.id }
+        const response = await fetch('/api/posts', {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updateData)
+        })
         
-        if (error) {
-          console.error('Error updating post:', error)
-          alert('Error updating post: ' + error.message)
-        } else {
+        if (response.ok) {
           fetchPosts()
           resetEditor()
           alert('Post updated successfully!')
+        } else {
+          const errorData = await response.json()
+          console.error('Error updating post:', errorData)
+          alert('Error updating post: ' + JSON.stringify(errorData, null, 2))
         }
       } else {
-        const { error } = await supabase
-          .from('blog_posts')
-          .insert([{ ...postData, created_at: new Date().toISOString() }])
+        const response = await fetch('/api/posts', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(postData)
+        })
         
-        if (error) {
-          console.error('Error creating post:', error)
-          alert('Error creating post: ' + error.message)
-        } else {
+        if (response.ok) {
           fetchPosts()
           resetEditor()
           alert('Post created successfully!')
+        } else {
+          const errorData = await response.json()
+          console.error('Error creating post:', errorData)
+          alert('Error creating post: ' + JSON.stringify(errorData, null, 2))
         }
       }
     } catch (err) {
@@ -295,7 +298,7 @@ export default function CMSPage() {
   const handleDeletePost = async (id: string) => {
     if (confirm('Are you sure you want to delete this post?')) {
       const { error } = await supabase
-        .from('blog_posts')
+        .from('posts')
         .delete()
         .eq('id', id)
       
@@ -309,13 +312,13 @@ export default function CMSPage() {
     }
   }
 
-  const handleEditPost = (post: Post) => {
+  const handleEditPost = (post: any) => {  // Use any for now since structure differs
     setEditingPost(post)
     setTitle(post.title)
     setSummary(post.excerpt || '')
-    setContent(post.content || '')
+    setContent(post.body_mdx || '')  // posts table uses 'body_mdx'
     setTags(post.tags?.join(', ') || '')
-    setIsPublished(post.published)
+    setIsPublished(!!post.published_at)  // posts table uses 'published_at'
     setShowEditor(true)
   }
 
@@ -398,7 +401,7 @@ export default function CMSPage() {
                           <p className="text-muted-foreground text-xs mb-0.5 line-clamp-1">{post.excerpt}</p>
                           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                             <span className="px-1 py-0.5 rounded-full text-xs bg-muted text-foreground">
-                              {post.published ? 'Published' : 'Draft'}
+                              {post.published_at ? 'Published' : 'Draft'}
                             </span>
                             <span className="text-xs">{new Date(post.created_at).toLocaleDateString()}</span>
                           </div>
@@ -432,44 +435,9 @@ export default function CMSPage() {
               </div>
             )}
 
-            {activeTab === 'analytics' && analyticsData && (
-              <div className="p-1 h-full">
-                {/* Analytics Header */}
-                <div className="mb-1">
-                  <h2 className="text-xs font-semibold text-foreground">Analytics</h2>
-                  <p className="text-muted-foreground text-xs">Site performance</p>
-                </div>
-
-                {/* Stats Grid */}
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-1">
-                  <div className="bg-card border border-border rounded p-1.5">
-                    <div className="flex items-center">
-                      <Eye className="w-3 h-3 text-branding-600 mr-1" />
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Views</p>
-                        <p className="text-xs font-bold text-foreground">{analyticsData?.totalViews.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-card border border-border rounded p-1.5">
-                    <div className="flex items-center">
-                      <Users className="w-3 h-3 text-green-600 mr-1" />
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Visitors</p>
-                        <p className="text-xs font-bold text-foreground">{analyticsData?.uniqueVisitors.toLocaleString()}</p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="bg-card border border-border rounded p-1.5">
-                    <div className="flex items-center">
-                      <Globe className="w-3 h-3 text-blue-600 mr-1" />
-                      <div>
-                        <p className="text-xs font-medium text-muted-foreground">Countries</p>
-                        <p className="text-xs font-bold text-foreground">{analyticsData?.topCountries.length}</p>
-                      </div>
-                    </div>
-                  </div>
-                </div>
+            {activeTab === 'analytics' && (
+              <div className="p-4 h-full overflow-auto">
+                <ClarityAnalyticsDashboard />
               </div>
             )}
           </div>

@@ -1,10 +1,10 @@
 'use client'
 
-import LightRays from './light-rays'
+import LightRaysFallback from './light-rays-fallback'
 
 export default function ThemeBackground() {
   return (
-    <LightRays 
+    <LightRaysFallback 
       raysOrigin="top-center"
       raysColor="#E85002"
       raysSpeed={1.0}
