@@ -1,6 +1,10 @@
 # Hidesh Kumar - Portfolio Website
 # Optimized for SEO while protecting sensitive endpoints
 
+# Clarity bot - needs access to CSS/JS for recordings
+User-agent: Clarity-Bot
+Allow: /
+
 # Default rule for all search engines
 User-agent: *
 Allow: /
