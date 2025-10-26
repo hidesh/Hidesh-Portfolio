@@ -24,6 +24,7 @@
     "@repo/shared": "*",
     "@supabase/ssr": "^0.3.0",
     "@supabase/supabase-js": "^2.75.0",
+    "@vercel/speed-insights": "^1.2.0",
     "autoprefixer": "^10.4.21",
     "clsx": "^2.1.0",
     "lucide-react": "^0.546.0",

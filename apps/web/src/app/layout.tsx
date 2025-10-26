@@ -2,6 +2,7 @@
 
 import { Inter } from 'next/font/google';
 import { usePathname } from 'next/navigation';
+import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConsentProvider } from '@/components/consent/consent-provider';
 import { ConsentManager } from '@/components/consent/consent-manager';
@@ -34,6 +35,7 @@ export default function RootLayout({
             </main>
             {!isCMSRoute && <Footer />}
             <ConsentManager />
+            <SpeedInsights />
           </ConsentProvider>
         </ThemeProvider>
       </body>
