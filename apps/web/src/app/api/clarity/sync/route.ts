@@ -31,7 +31,11 @@ export async function POST() {
     // Verify API token is configured
     if (!process.env.CLARITY_API_TOKEN) {
       return NextResponse.json(
-        { error: 'CLARITY_API_TOKEN not configured' },
+        { 
+          error: 'CLARITY_API_TOKEN not configured',
+          message: 'Please add CLARITY_API_TOKEN to your Vercel environment variables. Get your token from: https://clarity.microsoft.com/projects → Settings → Export API',
+          requests_remaining: usage.requests_remaining
+        },
         { status: 503 }
       )
     }

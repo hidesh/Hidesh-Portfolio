@@ -80,6 +80,10 @@ export function ClarityAnalyticsDashboard() {
       const result = await response.json()
       
       if (!response.ok) {
+        // Show helpful error message
+        if (response.status === 503 && result.error?.includes('CLARITY_API_TOKEN')) {
+          throw new Error('⚠️ Setup Required: Add CLARITY_API_TOKEN to Vercel environment variables. Get your token from Clarity dashboard → Settings → Export API.')
+        }
         throw new Error(result.error || result.message || 'Sync failed')
       }
       

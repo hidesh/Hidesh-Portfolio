@@ -18,8 +18,22 @@ export async function GET() {
 
     if (!latest) {
       console.log('📊 No analytics data in database yet')
+      
+      // Check if API token is configured
+      const hasToken = !!process.env.CLARITY_API_TOKEN
+      
       return NextResponse.json(
-        getMockData(),
+        {
+          ...getMockData(),
+          _metadata: {
+            fetched_at: new Date().toISOString(),
+            age_minutes: 0,
+            api_usage: { requests_today: 0, requests_remaining: 10, last_request: null },
+            is_mock: true,
+            setup_required: !hasToken,
+            setup_instructions: !hasToken ? 'No data yet. Click "Sync from Clarity API" to fetch real data. Make sure CLARITY_API_TOKEN is set in Vercel environment variables.' : 'No data yet. Click "Sync from Clarity API" to fetch your first analytics snapshot.'
+          }
+        },
         { 
           status: 200,
           headers: { 'X-Data-Source': 'MOCK' }
