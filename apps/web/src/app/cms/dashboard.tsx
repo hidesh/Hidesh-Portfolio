@@ -168,23 +168,6 @@ export default function CMSPage() {
   const [tags, setTags] = useState('')
   const [isPublished, setIsPublished] = useState(false)
 
-  useEffect(() => {
-    const initDashboard = async () => {
-      try {
-        await checkUser()
-        await fetchPosts()  
-      } catch (error) {
-        console.error('Dashboard error:', error)
-      } finally {
-        setLoading(false)
-      }
-    }
-    
-    initDashboard()
-  }, [])
-  
-
-
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     
@@ -193,10 +176,11 @@ export default function CMSPage() {
     
     if (!user && !isDummyAuth) {
       router.push('/login')
+      return false
     } else {
       setUser(user || { email: 'hidesh@live.dk' })
+      return true
     }
-    // Loading will be set to false after all data is fetched
   }
 
   const fetchPosts = async () => {
@@ -212,6 +196,43 @@ export default function CMSPage() {
       console.error('Error fetching posts:', error)
     }
   }
+
+  useEffect(() => {
+    const initDashboard = async () => {
+      try {
+        const isAuthenticated = await checkUser()
+        if (isAuthenticated) {
+          await fetchPosts()
+          setLoading(false)
+        }
+        // If not authenticated, keep loading state to prevent flash
+      } catch (error) {
+        console.error('Dashboard error:', error)
+        setLoading(false)
+      }
+    }
+    
+    initDashboard()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
+  useEffect(() => {
+    const initDashboard = async () => {
+      try {
+        const isAuthenticated = await checkUser()
+        if (isAuthenticated) {
+          await fetchPosts()
+          setLoading(false)
+        }
+        // If not authenticated, keep loading state to prevent flash
+      } catch (error) {
+        console.error('Dashboard error:', error)
+        setLoading(false)
+      }
+    }
+    
+    initDashboard()
+  }, [])
 
 
 

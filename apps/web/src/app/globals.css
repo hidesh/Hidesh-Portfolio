@@ -3,6 +3,11 @@
 @tailwind utilities;
 
 @layer base {
+  /* Smooth scroll behavior for anchor links */
+  html {
+    scroll-behavior: smooth;
+  }
+
   :root {
     /* Light mode colors */
     --background: 0 0% 100%; /* white */
@@ -96,6 +101,37 @@
   /* Animation utilities */
   .animate-fade-in {
     animation: fade-in 0.6s ease-out forwards;
+  }
+
+  /* Consent animations */
+  @keyframes slide-up {
+    from {
+      transform: translateY(100%);
+      opacity: 0;
+    }
+    to {
+      transform: translateY(0);
+      opacity: 1;
+    }
+  }
+
+  @keyframes scale-in {
+    from {
+      transform: scale(0.95);
+      opacity: 0;
+    }
+    to {
+      transform: scale(1);
+      opacity: 1;
+    }
+  }
+
+  .animate-slide-up {
+    animation: slide-up 0.4s ease-out forwards;
+  }
+
+  .animate-scale-in {
+    animation: scale-in 0.3s ease-out forwards;
   }
 
   /* Skill card adaptations for light mode */

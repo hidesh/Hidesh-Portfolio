@@ -6,9 +6,15 @@ import { useTheme } from '../theme-provider'
 export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
 
+  const handleToggle = () => {
+    const newTheme = theme === 'light' ? 'dark' : 'light'
+    console.log('Switching theme from', theme, 'to', newTheme)
+    setTheme(newTheme)
+  }
+
   return (
     <button
-      onClick={() => setTheme(theme === 'light' ? 'dark' : 'light')}
+      onClick={handleToggle}
       className="relative inline-flex h-10 w-10 items-center justify-center rounded-lg border border-branding-200 dark:border-branding-800 bg-muted backdrop-blur-sm transition-all duration-300 hover:border-branding-400 hover:bg-branding-50 dark:hover:bg-branding-900/20 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-branding-400"
       aria-label="Toggle theme"
     >

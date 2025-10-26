@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
@@ -11,9 +11,33 @@ export default function LoginPage() {
   const [password, setPassword] = useState('')
   const [showPassword, setShowPassword] = useState(false)
   const [loading, setLoading] = useState(false)
+  const [checking, setChecking] = useState(true)
   const [error, setError] = useState('')
   const router = useRouter()
   const supabase = createClient()
+
+  // Check if user is already logged in
+  useEffect(() => {
+    const checkAuth = async () => {
+      try {
+        const { data: { user } } = await supabase.auth.getUser()
+        const isDummyAuth = document.cookie.includes('dummyAuth=true')
+        
+        if (user || isDummyAuth) {
+          const urlParams = new URLSearchParams(window.location.search)
+          const redirectTo = urlParams.get('redirectedFrom') || '/cms'
+          router.push(redirectTo)
+        } else {
+          setChecking(false)
+        }
+      } catch (error) {
+        console.error('Auth check error:', error)
+        setChecking(false)
+      }
+    }
+    
+    checkAuth()
+  }, [])
 
     const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -40,6 +64,18 @@ export default function LoginPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  // Show loading while checking authentication
+  if (checking) {
+    return (
+      <div className="min-h-screen bg-background flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-branding-600 mx-auto"></div>
+          <p className="text-muted-foreground mt-4">Checking authentication...</p>
+        </div>
+      </div>
+    )
   }
 
   return (

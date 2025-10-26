@@ -1,8 +1,9 @@
-import { Suspense } from 'react'
-import ScrollStack from '@/components/ui/scroll-stack'
+import React from 'react'
+import ScrollStack from '@/components/ui/scroll-stack-clean'
+import { CareerPath } from '@/components/ui/career-path'
 import ThemeBackground from '@/components/ui/theme-background'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
-import SafeImage from '@/components/ui/safe-image'
+import Orb from '@/components/ui/orb'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 
@@ -22,43 +23,43 @@ export const metadata: Metadata = {
 }
 
 export default function Home() {
-  // Hardcoded projects - no database needed
+  // Real projects - GitHub and live projects
   const projects = [
     {
       id: '1',
-      title: 'AI Chat Assistant',
-      summary: 'Intelligent chat assistant powered by OpenAI GPT-4 with real-time responses and context awareness.',
-      tags: ['React', 'Next.js', 'OpenAI', 'TypeScript', 'Tailwind CSS'],
+      title: 'Automate Carwash',
+      summary: 'Progressive Web App for digitizing car wash operations. Features dynamic pricing algorithm with API integration (license plate, size, weight), online booking, customer login, real-time status, Firebase Cloud Messaging notifications, and Google Cloud Storage for images. Built with React, Node.js/Express, Supabase (PostgreSQL). Mobile-first PWA that reduces manual errors and increases revenue through automation.',
+      tags: ['React', 'Node.js', 'Express', 'Supabase', 'PostgreSQL', 'Firebase', 'Google Cloud', 'PWA'],
       cover_image: null,
-      live_url: 'https://chat-demo.hidesh.com',
-      repo_url: 'https://github.com/hidesh/ai-chat-assistant'
+      live_url: 'https://auto-carwash-code.vercel.app',
+      repo_url: null
     },
     {
       id: '2', 
-      title: 'E-commerce Platform',
-      summary: 'Full-stack e-commerce solution with payment integration, inventory management, and admin dashboard.',
-      tags: ['Next.js', 'Supabase', 'Stripe', 'PostgreSQL', 'Tailwind CSS'],
+      title: 'SQL Agent - Support Solutions',
+      summary: 'AI-powered SQL agent system for automated support solutions with intelligent query generation and data analysis.',
+      tags: ['AI', 'SQL', 'Python', 'Machine Learning', 'Automation'],
       cover_image: null,
-      live_url: 'https://shop-demo.hidesh.com',
-      repo_url: 'https://github.com/hidesh/ecommerce-platform'
+      live_url: null,
+      repo_url: 'https://github.com/hidesh/sql-agent---Support-Solutions'
     },
     {
       id: '3',
-      title: 'Task Management App', 
-      summary: 'Collaborative project management tool with real-time updates, team collaboration, and analytics.',
-      tags: ['React', 'Firebase', 'Material-UI', 'Node.js', 'Express'],
+      title: 'Support Solutions RAG', 
+      summary: 'Retrieval-Augmented Generation system for intelligent support documentation and knowledge base management.',
+      tags: ['RAG', 'AI', 'LangChain', 'Vector Database', 'NLP'],
       cover_image: null,
-      live_url: 'https://tasks-demo.hidesh.com',
-      repo_url: 'https://github.com/hidesh/task-manager'
+      live_url: null,
+      repo_url: 'https://github.com/hidesh/supportsolutions-rag'
     },
     {
       id: '4',
-      title: 'Portfolio Website',
-      summary: 'Modern portfolio website with CMS integration, blog functionality, and analytics dashboard.',
-      tags: ['Next.js', 'Supabase', 'TypeScript', 'Tailwind CSS', 'Vercel'],
+      title: 'Newsletter Automation',
+      summary: 'Automated newsletter system with intelligent content generation, scheduling, and distribution capabilities.',
+      tags: ['Automation', 'Node.js', 'Email Marketing', 'Scheduling', 'API Integration'],
       cover_image: null,
-      live_url: 'https://hidesh.com',
-      repo_url: 'https://github.com/hidesh/portfolio'
+      live_url: null,
+      repo_url: 'https://github.com/hidesh/Newsletter-Automation'
     }
   ]
 
@@ -116,34 +117,156 @@ export default function Home() {
     }
   ]
 
+  // Education timeline data
+  const educationTimeline = [
+    {
+      id: 1,
+      type: 'education' as const,
+      title: 'Bachelor in Web Development (PBA)',
+      company: 'Zealand Academy of Technologies and Business',
+      period: 'September 2023 - January 2025',
+      description: [
+        'Specialization in modern web development with focus on React and Next.js',
+        'Advanced frontend development and user experience design',
+        'Full-stack projects with backend service integration',
+        'Agile development and team collaboration'
+      ]
+    },
+    {
+      id: 2,
+      type: 'education' as const,
+      title: 'AP in Multimedia Design and Communication',
+      company: 'Zealand Academy of Technologies and Business',
+      period: 'September 2021 - June 2023',
+      description: [
+        'Fundamental competencies in web development and design',
+        'UX/UI design and user-centered development',
+        'Frontend technologies: HTML, CSS, JavaScript',
+        'Project management and creative problem solving'
+      ]
+    }
+  ]
+
+  // Work experience timeline data
+  const workTimeline = [
+    {
+      id: 1,
+      type: 'work' as const,
+      title: 'Full-stack Developer Intern',
+      company: 'Copenhagen Diamond Group A/S',
+      period: 'August 2024 - October 2024',
+      description: [
+        'Developed responsive frontend in Next.js with dynamic admin dashboard and product catalog',
+        'Created backend logic in Node.js and Express for handling REST APIs and real-time updates',
+        'Implemented real-time synchronization with Firebase and Google Cloud for secure file handling',
+        'Improved performance and maintainability by optimizing data flow between frontend and backend',
+        'Designed entire UI and user journey in Figma, including a functional prototype'
+      ]
+    },
+    {
+      id: 2,
+      type: 'work' as const,
+      title: 'Technical Sales & Support Specialist - Computer/IT Department',
+      company: 'Power A/S',
+      period: 'September 2023 - Present',
+      description: [
+        'Advising customers on IT and electronics by combining sales skills with technical knowledge',
+        'Performing complete setup of devices such as laptops, phones, and tablets',
+        'Providing support to customers and colleagues with hardware and software troubleshooting',
+        'Communicating solutions clearly and understandably to a diverse customer base'
+      ]
+    },
+    {
+      id: 3,
+      type: 'work' as const,
+      title: 'IT Supporter | Student Assistant',
+      company: 'Welcomebob A/S',
+      period: 'September 2023 - December 2023',
+      description: [
+        'Responsible for troubleshooting and monitoring of door entry systems, both on-site and via online platforms',
+        'Provided technical support and customer service over the phone, focusing on clear communication and fast issue resolution',
+        'Installed and repaired intercom systems in residential buildings with a focus on reliability and a positive service experience'
+      ]
+    },
+    {
+      id: 4,
+      type: 'work' as const,
+      title: 'Frontend Developer Intern',
+      company: 'Dreamplan.io (Fintech)',
+      period: 'January 2023 - March 2023',
+      description: [
+        'Developed responsive UI components in Next.js and Tailwind with focus on user-friendliness',
+        'Integrated dynamic data and API endpoints for visualization of live statistics',
+        'Worked in agile team with scrum, standups, and continuous improvements',
+        'Contributed to Git-flow and deployment processes'
+      ]
+    },
+    {
+      id: 5,
+      type: 'work' as const,
+      title: 'Student Assistant',
+      company: 'Zealand Academy of Technologies and Business',
+      period: 'August 2022 - June 2023',
+      description: [
+        'Provided individual guidance to students in development and programming projects',
+        'Assisted with Adobe Creative Cloud (including Premiere Pro and Photoshop) for design and media projects',
+        'Responsible for the media department with photo, video and 3D-print, from technical setup to guidance'
+      ]
+    },
+    {
+      id: 6,
+      type: 'work' as const,
+      title: 'Member & Participant – Girls in IT Zealand',
+      company: 'Volunteer Work',
+      period: 'September 2023 - Present',
+      description: [
+        'Participating in student initiative working to create more visibility and space for women in IT',
+        'Contributing with help for workshops, design and development of the website (Vue.js)',
+        'Working for diversity and for more women to be represented in the IT industry',
+        'Helping to ensure an inclusive community'
+      ]
+    }
+  ]
+
   return (
     <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
       {/* Hero Section */}
       <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-32">
-        <ErrorBoundary fallback={<div className="fixed inset-0 bg-gradient-to-br from-orange-50/10 to-transparent pointer-events-none z-0" />}>
-          <Suspense fallback={<div className="fixed inset-0 bg-gradient-to-br from-orange-50/10 to-transparent pointer-events-none z-0" />}>
-            <ThemeBackground />
-          </Suspense>
+        <ErrorBoundary fallback={<div className="fixed inset-0 bg-background/50 pointer-events-none z-0" />}>
+          <ThemeBackground />
         </ErrorBoundary>
         <div className="container mx-auto text-center relative z-20">
-          {/* Profile Image */}
-          <div className="mb-8 flex justify-center">
-            <div className="relative">
-              <div className="h-32 w-32 md:h-40 md:w-40 rounded-full bg-gradient-to-br from-branding-500 via-branding-600 to-branding-800 p-1 animate-pulse-slow">
-                <div className="h-full w-full rounded-full overflow-hidden">
-                  <ErrorBoundary fallback={<div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground">HK</div>}>
-                    <SafeImage
-                      src="/Hidesh-profile.png"
-                      alt="Hidesh Kumar"
-                      width={160}
-                      height={160}
-                      className="w-full h-full object-cover"
-                      priority
-                    />
-                  </ErrorBoundary>
+          {/* Profile Image with 3D Orb Ring */}
+          <div className="mb-12 flex justify-center">
+            <div className="relative w-72 h-72 md:w-96 md:h-96">
+              {/* 3D Orb Ring - Full Container */}
+              <div className="absolute inset-0">
+                <ErrorBoundary fallback={
+                  <div className="w-full h-full rounded-full bg-gradient-to-br from-branding-500 via-branding-600 to-branding-800 opacity-20"></div>
+                }>
+                  <Orb
+                    hue={200}
+                    hoverIntensity={2.5}
+                    rotateOnHover={false}
+                    forceHoverState={false}
+                  />
+                </ErrorBoundary>
+              </div>
+              
+              {/* Profile Image Centered on Top */}
+              <div className="absolute inset-0 flex items-center justify-center z-10">
+                <div className="relative w-40 h-40 md:w-52 md:h-52">
+                  <div className="h-full w-full rounded-full overflow-hidden ring-4 ring-background shadow-2xl">
+                    <ErrorBoundary fallback={<div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-2xl font-bold">HK</div>}>
+                      <img
+                        src="/Hidesh-profile.png"
+                        alt="Hidesh Kumar"
+                        className="w-full h-full object-cover"
+                      />
+                    </ErrorBoundary>
+                  </div>
                 </div>
               </div>
-              <div className="absolute -inset-1 rounded-full bg-gradient-to-r from-branding-500 via-branding-600 to-branding-800 opacity-30 blur-lg animate-pulse-slow"></div>
             </div>
           </div>
 
@@ -199,10 +322,6 @@ export default function Home() {
               <Mail className="h-6 w-6" />
             </a>
           </div>
-
-          <div className="animate-bounce">
-            <ChevronDown className="h-8 w-8 text-branding-600 mx-auto" />
-          </div>
         </div>
       </section>
 
@@ -250,6 +369,26 @@ export default function Home() {
         </div>
       </section>
 
+      {/* Education Section */}
+      <section id="education" className="relative z-10 py-20 px-6">
+        <div className="container mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
+            Education
+          </h2>
+          <CareerPath items={educationTimeline} />
+        </div>
+      </section>
+
+      {/* Work Experience Section */}
+      <section id="experience" className="relative z-10 py-20 px-6 bg-muted/30">
+        <div className="container mx-auto">
+          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
+            Work Experience
+          </h2>
+          <CareerPath items={workTimeline} />
+        </div>
+      </section>
+
       {/* Projects Section */}
       <section id="projects" className="relative z-10 py-20 px-6">
         <div className="container mx-auto">
@@ -257,14 +396,14 @@ export default function Home() {
             Featured Projects
           </h2>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 max-w-7xl mx-auto">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
             {projects?.map((project) => (
               <div
                 key={project.id}
-                className="project-card group bg-muted/50 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-6 hover:border-branding-400 transition-all duration-300"
+                className="project-card group bg-muted/50 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-6 hover:border-branding-400 transition-all duration-300 flex flex-col h-full"
               >
                 {project.cover_image && (
-                  <div className="mb-4 rounded-lg overflow-hidden">
+                  <div className="mb-4 rounded-lg overflow-hidden flex-shrink-0">
                     <img
                       src={project.cover_image}
                       alt={project.title}
@@ -273,20 +412,20 @@ export default function Home() {
                   </div>
                 )}
                 
-                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-branding-600 transition-colors">
+                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-branding-600 transition-colors flex-shrink-0">
                   {project.title}
                 </h3>
                 
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed">
+                <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-grow line-clamp-4">
                   {project.summary}
                 </p>
                 
                 {project.tags && (
-                  <div className="flex flex-wrap gap-2 mb-4">
+                  <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
                     {project.tags.map((tech: string) => (
                       <span
                         key={tech}
-                        className="px-3 py-1 text-xs font-medium bg-branding-500/20 text-branding-600 rounded-full"
+                        className="px-3 py-1 text-xs font-medium bg-branding-500/20 text-branding-600 dark:text-branding-400 rounded-full"
                       >
                         {tech}
                       </span>
@@ -294,7 +433,7 @@ export default function Home() {
                   </div>
                 )}
                 
-                <div className="flex space-x-4">
+                <div className="flex space-x-4 flex-shrink-0 mt-auto">
                   {project.live_url && (
                     <a
                       href={project.live_url}
@@ -328,10 +467,23 @@ export default function Home() {
           <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
             Skills & Technologies
           </h2>
-          <ErrorBoundary fallback={<div className="text-center text-muted-foreground">Loading skills...</div>}>
-            <Suspense fallback={<div className="text-center text-muted-foreground">Loading skills...</div>}>
-              <ScrollStack categories={skillCategories} />
-            </Suspense>
+          <ErrorBoundary fallback={
+            <div className="max-w-6xl mx-auto">
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {[...Array(6)].map((_, i) => (
+                  <div key={i} className="bg-muted/50 rounded-xl p-6 animate-pulse">
+                    <div className="h-6 bg-muted rounded mb-4"></div>
+                    <div className="space-y-2">
+                      {[...Array(4)].map((_, j) => (
+                        <div key={j} className="h-4 bg-muted rounded w-3/4"></div>
+                      ))}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          }>
+            <ScrollStack categories={skillCategories} />
           </ErrorBoundary>
         </div>
       </section>

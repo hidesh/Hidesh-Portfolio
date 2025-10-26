@@ -3,7 +3,8 @@
 import { Inter } from 'next/font/google';
 import { usePathname } from 'next/navigation';
 import { ThemeProvider } from '@/components/theme-provider';
-import { ClarityProvider } from '@/components/clarity-provider';
+import { ConsentProvider } from '@/components/consent/consent-provider';
+import { ConsentManager } from '@/components/consent/consent-manager';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 
@@ -24,15 +25,16 @@ export default function RootLayout({
 
   return (
     <html lang="en" className={inter.variable} suppressHydrationWarning>
-      <body className={`${inter.className} min-h-screen bg-background font-sans antialiased ${isCMSRoute ? '' : 'flex flex-col'}`}>
-        <ThemeProvider>
-          <ClarityProvider>
+      <body className={`${inter.className} min-h-screen bg-background font-sans antialiased flex flex-col`} suppressHydrationWarning>
+        <ThemeProvider defaultTheme="dark" storageKey="hidesh-portfolio-theme">
+          <ConsentProvider>
             {!isCMSRoute && <Header />}
-            <main id="main-content" className={isCMSRoute ? '' : 'flex-1'}>
+            <main id="main-content" className="flex-1">
               {children}
             </main>
             {!isCMSRoute && <Footer />}
-          </ClarityProvider>
+            <ConsentManager />
+          </ConsentProvider>
         </ThemeProvider>
       </body>
     </html>
