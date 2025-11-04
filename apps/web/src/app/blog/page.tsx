@@ -1,13 +1,31 @@
 import { createClient } from '@/lib/supabase/server';
 import { Metadata } from 'next';
 import Link from 'next/link';
+import { siteConfig, getOpenGraphMetadata, getTwitterMetadata } from '@/lib/seo';
 
 export const metadata: Metadata = {
-  title: 'Blog - Hidesh Kumar',
-  description: 'Read about my journey in software development, project insights, and tech thoughts.',
-  openGraph: {
+  title: 'Blog',
+  description: 'Read about my journey in software development, e-commerce solutions, AI automation, project insights, and tech thoughts. Learn from real-world experiences and tutorials.',
+  keywords: [
+    ...siteConfig.keywords,
+    'software development blog',
+    'web development tutorials',
+    'programming blog',
+    'tech blog',
+    'coding tutorials',
+    'developer insights',
+  ],
+  openGraph: getOpenGraphMetadata({
     title: 'Blog - Hidesh Kumar',
-    description: 'Read about my journey in software development, project insights, and tech thoughts.',
+    description: 'Read about my journey in software development, e-commerce solutions, AI automation, project insights, and tech thoughts.',
+    url: `${siteConfig.url}/blog`,
+  }),
+  twitter: getTwitterMetadata({
+    title: 'Blog - Hidesh Kumar',
+    description: 'Read about my journey in software development, e-commerce solutions, AI automation, project insights, and tech thoughts.',
+  }),
+  alternates: {
+    canonical: `${siteConfig.url}/blog`,
   },
 };
 

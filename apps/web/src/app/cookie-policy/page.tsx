@@ -1,8 +1,16 @@
 import type { Metadata } from 'next'
+import { siteConfig } from '@/lib/seo'
 
 export const metadata: Metadata = {
-  title: 'Cookie Policy - Hidesh Kumar',
-  description: 'Learn how we use cookies on this website.',
+  title: 'Cookie Policy',
+  description: 'Learn how we use cookies on this website to improve your experience and understand site usage.',
+  robots: {
+    index: true,
+    follow: true,
+  },
+  alternates: {
+    canonical: `${siteConfig.url}/cookie-policy`,
+  },
 }
 
 export default function CookiePolicyPage() {

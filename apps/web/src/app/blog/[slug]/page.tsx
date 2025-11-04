@@ -3,6 +3,7 @@ import { notFound } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
 import { ArrowLeft } from 'lucide-react';
+import { getBlogPostMetadata, siteConfig } from '@/lib/seo';
 
 interface BlogPost {
   id: string;
@@ -53,17 +54,14 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     };
   }
 
-  return {
-    title: `${post.title} - Hidesh Kumar`,
+  return getBlogPostMetadata({
+    title: post.title,
     description: post.excerpt,
-    openGraph: {
-      title: post.title,
-      description: post.excerpt,
-      type: 'article',
-      publishedTime: post.created_at,
-      modifiedTime: post.updated_at,
-    },
-  };
+    publishedTime: post.created_at,
+    modifiedTime: post.updated_at,
+    tags: post.tags,
+    image: post.cover_image || undefined,
+  });
 }
 
 export default async function BlogPostPage({ params }: PageProps) {

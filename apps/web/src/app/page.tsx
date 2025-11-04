@@ -6,6 +6,7 @@ import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Orb from '@/components/ui/orb'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
+import { siteConfig, getOpenGraphMetadata, getTwitterMetadata } from '@/lib/seo'
 
 interface Project {
   id: string
@@ -18,8 +19,20 @@ interface Project {
 }
 
 export const metadata: Metadata = {
-  title: 'Hidesh Kumar - Software Engineer',
-  description: 'Software Engineer passionate about building exceptional digital experiences with modern technologies. Specializing in React, Next.js, TypeScript, and cloud architecture.',
+  title: siteConfig.title,
+  description: siteConfig.description,
+  keywords: siteConfig.keywords,
+  openGraph: getOpenGraphMetadata({
+    title: siteConfig.title,
+    description: siteConfig.description,
+  }),
+  twitter: getTwitterMetadata({
+    title: siteConfig.title,
+    description: siteConfig.description,
+  }),
+  alternates: {
+    canonical: siteConfig.url,
+  },
 }
 
 export default function Home() {
