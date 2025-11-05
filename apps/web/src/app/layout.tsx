@@ -9,7 +9,7 @@ import { ChristmasVideoBackground } from '@/components/christmas/christmas-video
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { LayoutContent } from '@/components/layout-content';
-import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema, getWebPageSchema } from '@/lib/seo';
+import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema, getWebPageSchema, getBreadcrumbSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 import './globals.css';
@@ -78,6 +78,7 @@ export default function RootLayout({
   const personSchema = getPersonSchema();
   const websiteSchema = getWebsiteSchema();
   const webPageSchema = getWebPageSchema();
+  const breadcrumbSchema = getBreadcrumbSchema();
 
   return (
     <html lang="en" className={`${inter.variable} ${eduFont.variable}`} suppressHydrationWarning>
@@ -87,7 +88,7 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vercel-insights.com" />
         
-        {/* JSON-LD Structured Data */}
+        {/* JSON-LD Structured Data for Google Sitelinks */}
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
@@ -104,6 +105,12 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify(webPageSchema),
+          }}
+        />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(breadcrumbSchema),
           }}
         />
       </head>

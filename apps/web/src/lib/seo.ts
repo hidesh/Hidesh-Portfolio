@@ -253,6 +253,66 @@ export function getProfessionalServiceSchema() {
 }
 
 /**
+ * JSON-LD for BreadcrumbList - helps Google understand site structure
+ */
+export function getBreadcrumbSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'BreadcrumbList',
+    itemListElement: [
+      {
+        '@type': 'ListItem',
+        position: 1,
+        name: 'Home',
+        item: siteConfig.url,
+      },
+      {
+        '@type': 'ListItem',
+        position: 2,
+        name: 'About',
+        item: `${siteConfig.url}/#about`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 3,
+        name: 'Education',
+        item: `${siteConfig.url}/#education`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 4,
+        name: 'Experience',
+        item: `${siteConfig.url}/#experience`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 5,
+        name: 'Projects',
+        item: `${siteConfig.url}/#projects`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 6,
+        name: 'Skills',
+        item: `${siteConfig.url}/#skills`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 7,
+        name: 'Contact',
+        item: `${siteConfig.url}/#contact`,
+      },
+      {
+        '@type': 'ListItem',
+        position: 8,
+        name: 'Blog',
+        item: `${siteConfig.url}/blog`,
+      },
+    ],
+  }
+}
+
+/**
  * Generate Open Graph metadata
  */
 export function getOpenGraphMetadata(params?: {
