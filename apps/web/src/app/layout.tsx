@@ -88,6 +88,9 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         <link rel="dns-prefetch" href="https://vercel-insights.com" />
         
+        {/* ALTCHA Widget Script */}
+        <script type="module" src="https://cdn.jsdelivr.net/npm/altcha@latest/dist/altcha.min.js" async />
+        
         {/* JSON-LD Structured Data for Google Sitelinks */}
         <script
           type="application/ld+json"

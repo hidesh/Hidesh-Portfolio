@@ -2,7 +2,8 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { useRouter } from 'next/navigation'
+import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
 import { 
@@ -22,7 +23,8 @@ import {
   Settings,
   Home,
   Menu,
-  ChevronLeft
+  ChevronLeft,
+  Mail
 } from 'lucide-react'
 
 interface Post {
@@ -50,9 +52,12 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
   setSidebarOpen: (open: boolean) => void
   user: any
 }) {
+  const pathname = usePathname()
+  
   const sidebarItems = [
-    { id: 'posts', label: 'Posts', icon: FileText },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'posts', label: 'Posts', icon: FileText, href: '/cms' },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/cms' },
+    { id: 'messages', label: 'Messages', icon: Mail, href: '/cms/messages' },
   ]
 
   return (
@@ -90,24 +95,45 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
             <ul className="space-y-2">
               {sidebarItems.map((item) => {
                 const Icon = item.icon
+                const isActive = item.href === '/cms/messages' 
+                  ? pathname === '/cms/messages'
+                  : pathname === '/cms' && activeTab === item.id
+                
                 return (
                   <li key={item.id}>
-                    <button
-                      onClick={() => {
-                        setActiveTab(item.id as 'posts' | 'analytics')
-                        setSidebarOpen(false)
-                      }}
-                      className={`
-                        w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
-                        ${activeTab === item.id 
-                          ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                        }
-                      `}
-                    >
-                      <Icon className="w-5 h-5 mr-3" />
-                      {item.label}
-                    </button>
+                    {item.href === '/cms/messages' ? (
+                      <Link
+                        href={item.href}
+                        onClick={() => setSidebarOpen(false)}
+                        className={`
+                          w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
+                          ${isActive
+                            ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                          }
+                        `}
+                      >
+                        <Icon className="w-5 h-5 mr-3" />
+                        {item.label}
+                      </Link>
+                    ) : (
+                      <button
+                        onClick={() => {
+                          setActiveTab(item.id as 'posts' | 'analytics')
+                          setSidebarOpen(false)
+                        }}
+                        className={`
+                          w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
+                          ${isActive
+                            ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                          }
+                        `}
+                      >
+                        <Icon className="w-5 h-5 mr-3" />
+                        {item.label}
+                      </button>
+                    )}
                   </li>
                 )
               })}

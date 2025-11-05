@@ -5,6 +5,7 @@ import { CareerPath } from '@/components/ui/career-path'
 import ThemeBackground from '@/components/ui/theme-background'
 import { ErrorBoundary } from '@/components/ui/error-boundary'
 import Orb from '@/components/ui/orb'
+import { ContactForm } from '@/components/contact-form'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 import { siteConfig, getOpenGraphMetadata, getTwitterMetadata } from '@/lib/seo'
@@ -512,17 +513,22 @@ export default function Home() {
 
       {/* Contact Section */}
       <section id="contact" className="relative z-10 py-20 px-6">
-        <div className="container mx-auto max-w-2xl text-center">
-          <h2 className="text-4xl md:text-5xl font-bold mb-8 text-gradient">
-            Let&apos;s Connect
-          </h2>
+        <div className="container mx-auto max-w-3xl">
+          <div className="text-center mb-12">
+            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-gradient">
+              Let&apos;s Connect
+            </h2>
+            
+            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
+              I&apos;m always interested in hearing about new opportunities and exciting projects.
+              Let&apos;s build something amazing together!
+            </p>
+          </div>
+
+          <ContactForm />
           
-          <p className="text-muted-foreground text-lg mb-12 leading-relaxed">
-            I&apos;m always interested in hearing about new opportunities and exciting projects.
-            Let&apos;s build something amazing together!
-          </p>
-          
-          <div className="space-y-6">
+          <div className="mt-12 text-center space-y-6">
+            <p className="text-muted-foreground text-sm">Or reach out directly:</p>
             <a
               href="mailto:hidesh@live.dk"
               className="btn-primary inline-flex items-center px-8 py-4 bg-gradient-to-r from-branding-600 to-branding-800 hover:from-branding-500 hover:to-branding-700 text-white font-semibold rounded-xl transition-all duration-300 glow-hover"
