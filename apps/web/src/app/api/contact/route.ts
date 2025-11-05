@@ -68,26 +68,25 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Get client info
-    const ipAddress = request.headers.get('x-forwarded-for') || request.headers.get('x-real-ip') || 'unknown'
-    const userAgent = request.headers.get('user-agent') || 'unknown'
-
-    // Save to Supabase
+    // Save to Supabase - combine subject and message
+    const fullMessage = subject ? `Subject: ${subject}\n\n${message}` : message
+    
+    console.log('Attempting to save to Supabase:', { name, email, messageLength: fullMessage.length, handled: false })
+    
     const { data: savedMessage, error: dbError } = await supabase
-      .from('contact_messages')
+      .from('contacts')
       .insert([
         {
           name,
           email,
-          subject,
-          message,
-          ip_address: ipAddress,
-          user_agent: userAgent,
-          status: 'not_read',
+          message: fullMessage,
+          handled: false,
         },
       ])
       .select()
       .single()
+
+    console.log('Supabase response:', { savedMessage, dbError })
 
     if (dbError) {
       console.error('Database error:', dbError)
@@ -121,13 +120,12 @@ export async function POST(request: NextRequest) {
 
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #6b7280;">
               <p><strong>Submission Details:</strong></p>
-              <p>IP Address: ${ipAddress}</p>
               <p>Time: ${new Date().toLocaleString('da-DK', { timeZone: 'Europe/Copenhagen' })}</p>
               <p>Message ID: ${savedMessage.id}</p>
             </div>
 
             <div style="margin-top: 20px; text-align: center;">
-              <a href="https://www.hidesh.com/cms" style="display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+              <a href="https://www.hidesh.com/cms?tab=messages" style="display: inline-block; padding: 12px 24px; background: #2563eb; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
                 View in Dashboard
               </a>
             </div>

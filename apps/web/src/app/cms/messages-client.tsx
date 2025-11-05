@@ -40,6 +40,7 @@ export function MessagesClient() {
     if (error) {
       console.error('Error fetching messages:', error)
     } else {
+      console.log('Fetched messages:', data)
       setMessages(data || [])
     }
     setLoading(false)

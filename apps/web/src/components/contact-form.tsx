@@ -3,15 +3,6 @@
 import { useState, useEffect, useRef } from 'react'
 import { Mail, User, MessageSquare, Send, CheckCircle, AlertCircle, Shield } from 'lucide-react'
 
-// Declare the custom element
-declare global {
-  namespace JSX {
-    interface IntrinsicElements {
-      'altcha-widget': any
-    }
-  }
-}
-
 export function ContactForm() {
   const [formData, setFormData] = useState({
     name: '',
@@ -210,6 +201,7 @@ export function ContactForm() {
               <span className="ml-3 text-sm text-muted-foreground">Loading verification...</span>
             </div>
           ) : (
+            // @ts-ignore - Custom element type defined in src/types/altcha.d.ts
             <altcha-widget
               ref={widgetRef}
               challengeurl="/api/altcha/challenge"

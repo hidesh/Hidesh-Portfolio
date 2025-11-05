@@ -6,6 +6,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
+import { MessagesClient } from './messages-client'
 import { 
   Plus, 
   Edit3, 
@@ -45,8 +46,8 @@ interface Post {
 
 // Sidebar Navigation Component
 function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSidebarOpen, user }: {
-  activeTab: 'posts' | 'analytics'
-  setActiveTab: (tab: 'posts' | 'analytics') => void
+  activeTab: 'posts' | 'analytics' | 'messages'
+  setActiveTab: (tab: 'posts' | 'analytics' | 'messages') => void
   onSignOut: () => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
@@ -55,9 +56,9 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
   const pathname = usePathname()
   
   const sidebarItems = [
-    { id: 'posts', label: 'Posts', icon: FileText, href: '/cms' },
-    { id: 'analytics', label: 'Analytics', icon: BarChart3, href: '/cms' },
-    { id: 'messages', label: 'Messages', icon: Mail, href: '/cms/messages' },
+    { id: 'posts', label: 'Posts', icon: FileText },
+    { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'messages', label: 'Messages', icon: Mail },
   ]
 
   return (
@@ -95,45 +96,26 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
             <ul className="space-y-2">
               {sidebarItems.map((item) => {
                 const Icon = item.icon
-                const isActive = item.href === '/cms/messages' 
-                  ? pathname === '/cms/messages'
-                  : pathname === '/cms' && activeTab === item.id
+                const isActive = activeTab === item.id
                 
                 return (
                   <li key={item.id}>
-                    {item.href === '/cms/messages' ? (
-                      <Link
-                        href={item.href}
-                        onClick={() => setSidebarOpen(false)}
-                        className={`
-                          w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
-                          ${isActive
-                            ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                          }
-                        `}
-                      >
-                        <Icon className="w-5 h-5 mr-3" />
-                        {item.label}
-                      </Link>
-                    ) : (
-                      <button
-                        onClick={() => {
-                          setActiveTab(item.id as 'posts' | 'analytics')
-                          setSidebarOpen(false)
-                        }}
-                        className={`
-                          w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
-                          ${isActive
-                            ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
-                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
-                          }
-                        `}
-                      >
-                        <Icon className="w-5 h-5 mr-3" />
-                        {item.label}
-                      </button>
-                    )}
+                    <button
+                      onClick={() => {
+                        setActiveTab(item.id as 'posts' | 'analytics' | 'messages')
+                        setSidebarOpen(false)
+                      }}
+                      className={`
+                        w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
+                        ${isActive
+                          ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
+                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        }
+                      `}
+                    >
+                      <Icon className="w-5 h-5 mr-3" />
+                      {item.label}
+                    </button>
                   </li>
                 )
               })}
@@ -181,11 +163,23 @@ export default function CMSPage() {
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
-  const [activeTab, setActiveTab] = useState<'posts' | 'analytics'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'analytics' | 'messages'>('posts')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
   const router = useRouter()
+  const pathname = usePathname()
   const supabase = createClient()
+
+  // Check URL parameters for tab
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const searchParams = new URLSearchParams(window.location.search)
+      const tab = searchParams.get('tab')
+      if (tab === 'messages' || tab === 'analytics' || tab === 'posts') {
+        setActiveTab(tab as 'posts' | 'analytics' | 'messages')
+      }
+    }
+  }, [pathname])
 
   // Form state
   const [title, setTitle] = useState('')
@@ -485,6 +479,12 @@ export default function CMSPage() {
             {activeTab === 'analytics' && (
               <div className="p-4 h-full overflow-auto">
                 <ClarityAnalyticsDashboard />
+              </div>
+            )}
+
+            {activeTab === 'messages' && (
+              <div className="p-4 h-full overflow-auto">
+                <MessagesClient />
               </div>
             )}
           </div>

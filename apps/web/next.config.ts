@@ -14,7 +14,7 @@ const nextConfig: NextConfig = {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
-    qualities: [75, 90, 100], // Support quality levels for Next.js Image component
+    qualities: [75, 90, 100],
     minimumCacheTTL: 60,
     remotePatterns: [
       {
@@ -32,6 +32,19 @@ const nextConfig: NextConfig = {
   experimental: {
     optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react-snowfall'],
     webVitalsAttribution: ['CLS', 'LCP'],
+  },
+  
+  // Webpack config for altcha
+  webpack: (config, { isServer }) => {
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+        net: false,
+        tls: false,
+      }
+    }
+    return config
   },
   async headers() {
     return [
