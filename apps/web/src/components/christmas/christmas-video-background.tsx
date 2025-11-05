@@ -20,7 +20,7 @@ export function ChristmasVideoBackground() {
           mixBlendMode: 'screen',
         }}
       >
-        <source src="/christmas-video.mp4" type="video/mp4" />
+        <source src="https://raqtsjbnxhd2d05h.public.blob.vercel-storage.com/christmas-video.mp4" type="video/mp4" />
       </video>
       {/* Overlay for bedre læsbarhed */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/20 via-transparent to-black/40" />

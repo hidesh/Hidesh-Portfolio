@@ -50,6 +50,13 @@ coverage
 *.sqlite
 *.db
 
+# Large media files (use Vercel Blob instead)
+*.mp4
+*.mov
+*.avi
+*.mkv
+christmas-video.mp4
+
 # Temporary files
 tmp
 temp
