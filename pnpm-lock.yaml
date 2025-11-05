@@ -84,6 +84,9 @@ importers:
       react-icons:
         specifier: ^5.5.0
         version: 5.5.0(react@19.1.0)
+      react-snowfall:
+        specifier: ^2.3.0
+        version: 2.3.0(react-dom@19.1.0)(react@19.1.0)
       tailwind-merge:
         specifier: ^2.2.1
         version: 2.6.0
@@ -6984,6 +6987,10 @@ packages:
       react: 19.1.0
       scheduler: 0.26.0
 
+  /react-fast-compare@3.2.2:
+    resolution: {integrity: sha512-nsO+KSNgo1SbJqJEYRE9ERzo7YtYbou/OqjSQKxV7jcKox7+usiUVZOAC+XnDOABXggQTno0Y1CpVnuWEc1boQ==}
+    dev: false
+
   /react-icons@5.5.0(react@19.1.0):
     resolution: {integrity: sha512-MEFcXdkP3dLo8uumGI5xN3lDFNsRtrjbOEKDLD7yv76v4wpnEq2Lt2qeHaQOr34I/wPN3s3+N08WkQ+CW37Xiw==}
     peerDependencies:
@@ -7003,6 +7010,17 @@ packages:
   /react-is@18.3.1:
     resolution: {integrity: sha512-/LLMVyas0ljjAtoYiPqYiL8VWXzUUdThrmU5+n20DZv+a+ClRoevUzw5JxU+Ieh5/c87ytoTBV9G1FiKfNJdmg==}
     dev: true
+
+  /react-snowfall@2.3.0(react-dom@19.1.0)(react@19.1.0):
+    resolution: {integrity: sha512-+ms0lEWz30GqfGdFGFIk5YNBya2lvFA9SWWJa6di0xVpgU7qnvLbMXrh0qzfge1xDxw+Gh0FZ1IVG3YEJ+vRNQ==}
+    peerDependencies:
+      react: "^16.8 ||\_17.x || 18.x || 19.x"
+      react-dom: ^16.8 || 17.x || 18.x || 19.x
+    dependencies:
+      react: 19.1.0
+      react-dom: 19.1.0(react@19.1.0)
+      react-fast-compare: 3.2.2
+    dev: false
 
   /react@19.1.0:
     resolution: {integrity: sha512-FS+XFBNvn3GTAWq26joslQgWNoFu08F4kl0J4CgdNKADkdSGXQyTCnKteIAJy96Br6YbpEU1LSzV5dYtjMkMDg==}

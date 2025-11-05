@@ -6,11 +6,15 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
+  // Enable source maps for production debugging
+  productionBrowserSourceMaps: true,
+  
   // Enhanced image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    qualities: [75, 90, 100], // Support quality levels for Next.js Image component
     minimumCacheTTL: 60,
     remotePatterns: [
       {
@@ -26,7 +30,7 @@ const nextConfig: NextConfig = {
   
   // Bundle optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react', '@supabase/supabase-js'],
+    optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react-snowfall'],
     webVitalsAttribution: ['CLS', 'LCP'],
   },
   async headers() {
@@ -50,6 +54,10 @@ const nextConfig: NextConfig = {
             key: 'Permissions-Policy',
             value: 'camera=(), microphone=(), geolocation=()',
           },
+          {
+            key: 'X-DNS-Prefetch-Control',
+            value: 'on',
+          },
         ],
       },
       {
@@ -67,6 +75,24 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/:path*.{jpg,jpeg,png,gif,webp,avif,ico,svg}',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
+      {
+        source: '/christmas-video.mp4',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=604800, stale-while-revalidate=86400',
           },
         ],
       },

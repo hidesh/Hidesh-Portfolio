@@ -1,12 +1,15 @@
-import { Inter } from 'next/font/google';
+import { Inter, Edu_NSW_ACT_Foundation } from 'next/font/google';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { ThemeProvider } from '@/components/theme-provider';
 import { ConsentProvider } from '@/components/consent/consent-provider';
 import { ConsentManager } from '@/components/consent/consent-manager';
+import { ChristmasProvider } from '@/components/christmas/christmas-provider';
+import { ChristmasSnowfall } from '@/components/christmas/christmas-snowfall';
+import { ChristmasVideoBackground } from '@/components/christmas/christmas-video-background';
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { LayoutContent } from '@/components/layout-content';
-import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema } from '@/lib/seo';
+import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema, getWebPageSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 import './globals.css';
@@ -14,6 +17,11 @@ import './globals.css';
 const inter = Inter({
   subsets: ['latin'],
   variable: '--font-sans',
+});
+
+const eduFont = Edu_NSW_ACT_Foundation({
+  subsets: ['latin'],
+  variable: '--font-cursive',
 });
 
 // Root metadata for SEO
@@ -33,6 +41,8 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
+  applicationName: siteConfig.name,
+  referrer: 'origin-when-cross-origin',
   openGraph: getOpenGraphMetadata(),
   twitter: getTwitterMetadata(),
   robots: {
@@ -67,10 +77,16 @@ export default function RootLayout({
 }) {
   const personSchema = getPersonSchema();
   const websiteSchema = getWebsiteSchema();
+  const webPageSchema = getWebPageSchema();
 
   return (
-    <html lang="en" className={inter.variable} suppressHydrationWarning>
+    <html lang="en" className={`${inter.variable} ${eduFont.variable}`} suppressHydrationWarning>
       <head>
+        {/* Preconnect to external domains for performance */}
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link rel="dns-prefetch" href="https://vercel-insights.com" />
+        
         {/* JSON-LD Structured Data */}
         <script
           type="application/ld+json"
@@ -84,15 +100,25 @@ export default function RootLayout({
             __html: JSON.stringify(websiteSchema),
           }}
         />
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(webPageSchema),
+          }}
+        />
       </head>
       <body className={`${inter.className} min-h-screen bg-background font-sans antialiased flex flex-col`} suppressHydrationWarning>
         <ThemeProvider defaultTheme="dark" storageKey="hidesh-portfolio-theme">
           <ConsentProvider>
-            <LayoutContent>
-              {children}
-            </LayoutContent>
-            <ConsentManager />
-            <SpeedInsights />
+            <ChristmasProvider>
+              <ChristmasVideoBackground />
+              <ChristmasSnowfall />
+              <LayoutContent>
+                {children}
+              </LayoutContent>
+              <ConsentManager />
+              <SpeedInsights />
+            </ChristmasProvider>
           </ConsentProvider>
         </ThemeProvider>
       </body>

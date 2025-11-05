@@ -67,6 +67,54 @@
     --ring: 240 4.9% 83.9%; /* light ring */
   }
 
+  /* Christmas Mode Theme 🎄 - OVERSKRIVER BÅDE LIGHT OG DARK MODE! */
+  .christmas-mode,
+  .christmas-mode.dark,
+  .dark.christmas-mode,
+  html.christmas-mode,
+  html.christmas-mode.dark {
+    /* Christmas colors - Red, White, Green */
+    --background: 355 50% 15% !important; /* Deep red-black background */
+    --foreground: 0 0% 98% !important; /* Snow white text */
+    --card: 355 40% 20% !important; /* Dark red card */
+    --card-foreground: 0 0% 98% !important; /* Snow white */
+    --popover: 355 40% 20% !important; /* Dark red */
+    --popover-foreground: 0 0% 98% !important; /* Snow white */
+    --primary: 0 0% 95% !important; /* Snow white primary */
+    --primary-foreground: 355 70% 45% !important; /* Christmas red */
+    --secondary: 355 70% 45% !important; /* Christmas red secondary */
+    --secondary-foreground: 0 0% 98% !important; /* Snow white */
+    --muted: 140 30% 25% !important; /* Dark forest green */
+    --muted-foreground: 0 0% 85% !important; /* Light snow */
+    --accent: 140 50% 40% !important; /* Christmas green accent */
+    --accent-foreground: 0 0% 98% !important; /* Snow white */
+    --destructive: 355 85% 50% !important; /* Bright red */
+    --destructive-foreground: 0 0% 98% !important; /* Snow white */
+    --border: 355 30% 30% !important; /* Red border */
+    --input: 355 30% 25% !important; /* Red input */
+    --ring: 140 50% 50% !important; /* Green ring */
+    
+    /* Christmas branding colors */
+    --branding-50: 355 100% 96% !important;
+    --branding-100: 355 100% 90% !important;
+    --branding-200: 355 90% 80% !important;
+    --branding-300: 355 85% 70% !important;
+    --branding-400: 355 80% 60% !important;
+    --branding-500: 355 75% 50% !important; /* Christmas red */
+    --branding-600: 355 70% 45% !important;
+    --branding-700: 355 65% 40% !important;
+    --branding-800: 355 60% 35% !important;
+    --branding-900: 355 55% 30% !important;
+  }
+
+  .christmas-mode .text-gradient,
+  .christmas-mode.dark .text-gradient {
+    background: linear-gradient(135deg, #ff0000, #00ff00, #ffffff, #ffd700) !important;
+    -webkit-background-clip: text !important;
+    -webkit-text-fill-color: transparent !important;
+    background-clip: text !important;
+  }
+
   * {
     @apply border-border;
   }

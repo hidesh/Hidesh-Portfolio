@@ -6,6 +6,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, Github, Linkedin, Mail } from 'lucide-react'
 import { ThemeToggle } from './ui/theme-toggle'
+import { SantaButton } from './christmas/santa-button'
 
 const navigation = [
   { name: 'Home', href: '/#home' },
@@ -85,6 +86,7 @@ export function Header() {
 
             {/* Social Links & Theme Toggle */}
             <div className="hidden lg:flex items-center space-x-4">
+              <SantaButton />
               {socialLinks.map((link) => {
                 const Icon = link.icon
                 return (
@@ -105,6 +107,7 @@ export function Header() {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-4">
+              <SantaButton />
               <ThemeToggle />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}

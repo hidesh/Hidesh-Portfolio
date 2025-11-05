@@ -137,7 +137,7 @@ export function getPersonSchema() {
 }
 
 /**
- * JSON-LD Structured Data for Website Schema
+ * JSON-LD Structured Data for Website Schema with Sitelinks Search Box
  */
 export function getWebsiteSchema() {
   return {
@@ -151,6 +151,81 @@ export function getWebsiteSchema() {
       name: siteConfig.name,
     },
     inLanguage: 'en-US',
+    potentialAction: {
+      '@type': 'SearchAction',
+      target: {
+        '@type': 'EntryPoint',
+        urlTemplate: `${siteConfig.url}/?s={search_term_string}`,
+      },
+      'query-input': 'required name=search_term_string',
+    },
+  }
+}
+
+/**
+ * JSON-LD for WebPage with BreadcrumbList for subpages
+ */
+export function getWebPageSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'WebPage',
+    name: siteConfig.title,
+    url: siteConfig.url,
+    description: siteConfig.description,
+    mainEntity: {
+      '@type': 'ItemList',
+      itemListElement: [
+        {
+          '@type': 'SiteNavigationElement',
+          position: 1,
+          name: 'About Me',
+          description: 'Learn about Hidesh Kumar - Software Engineer',
+          url: `${siteConfig.url}/#about`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 2,
+          name: 'Education',
+          description: 'Educational background and qualifications',
+          url: `${siteConfig.url}/#education`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 3,
+          name: 'Work Experience',
+          description: 'Professional work experience and roles',
+          url: `${siteConfig.url}/#experience`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 4,
+          name: 'Projects',
+          description: 'Featured software development projects',
+          url: `${siteConfig.url}/#projects`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 5,
+          name: 'Skills',
+          description: 'Technical skills and technologies',
+          url: `${siteConfig.url}/#skills`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 6,
+          name: 'Contact',
+          description: 'Get in touch with Hidesh Kumar',
+          url: `${siteConfig.url}/#contact`,
+        },
+        {
+          '@type': 'SiteNavigationElement',
+          position: 7,
+          name: 'Blog',
+          description: 'Software development insights and tutorials',
+          url: `${siteConfig.url}/blog`,
+        },
+      ],
+    },
   }
 }
 

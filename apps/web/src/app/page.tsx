@@ -1,4 +1,5 @@
 import React from 'react'
+import Image from 'next/image'
 import ScrollStack from '@/components/ui/scroll-stack-clean'
 import { CareerPath } from '@/components/ui/career-path'
 import ThemeBackground from '@/components/ui/theme-background'
@@ -18,21 +19,24 @@ interface Project {
   repo_url: string | null
 }
 
-export const metadata: Metadata = {
-  title: siteConfig.title,
-  description: siteConfig.description,
-  keywords: siteConfig.keywords,
-  openGraph: getOpenGraphMetadata({
+export async function generateMetadata(): Promise<Metadata> {
+  return {
     title: siteConfig.title,
     description: siteConfig.description,
-  }),
-  twitter: getTwitterMetadata({
-    title: siteConfig.title,
-    description: siteConfig.description,
-  }),
-  alternates: {
-    canonical: siteConfig.url,
-  },
+    keywords: siteConfig.keywords,
+    authors: [{ name: siteConfig.author, url: siteConfig.url }],
+    openGraph: getOpenGraphMetadata({
+      title: siteConfig.title,
+      description: siteConfig.description,
+    }),
+    twitter: getTwitterMetadata({
+      title: siteConfig.title,
+      description: siteConfig.description,
+    }),
+    alternates: {
+      canonical: siteConfig.url,
+    },
+  }
 }
 
 export default function Home() {
@@ -242,7 +246,7 @@ export default function Home() {
   ]
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background text-foreground">
+    <div className="relative min-h-screen overflow-hidden bg-background/95 text-foreground">
       {/* Hero Section */}
       <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-32">
         <ErrorBoundary fallback={<div className="fixed inset-0 bg-background/50 pointer-events-none z-0" />}>
@@ -271,10 +275,15 @@ export default function Home() {
                 <div className="relative w-40 h-40 md:w-52 md:h-52">
                   <div className="h-full w-full rounded-full overflow-hidden ring-4 ring-background shadow-2xl">
                     <ErrorBoundary fallback={<div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-2xl font-bold">HK</div>}>
-                      <img
+                      <Image
                         src="/Hidesh-profile.png"
-                        alt="Hidesh Kumar"
+                        alt="Hidesh Kumar - Software Engineer"
+                        width={208}
+                        height={208}
+                        priority
                         className="w-full h-full object-cover"
+                        sizes="(max-width: 768px) 160px, 208px"
+                        quality={90}
                       />
                     </ErrorBoundary>
                   </div>

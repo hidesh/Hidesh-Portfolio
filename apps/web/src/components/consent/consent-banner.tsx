@@ -83,7 +83,7 @@ export function ConsentBanner() {
                 href="/cookie-policy"
                 className="text-branding-600 hover:text-branding-700 underline focus:outline-none focus:ring-2 focus:ring-branding-500 focus:ring-offset-2 rounded"
               >
-                Learn more
+                Learn more about our cookie policy
               </a>
             </p>
           </div>

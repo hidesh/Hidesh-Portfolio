@@ -13,13 +13,19 @@ export function loadClarity(): void {
   // Only run on client
   if (typeof window === 'undefined') return
   
+  // Don't load in development
+  if (process.env.NODE_ENV === 'development') {
+    console.info('[Clarity] Disabled in development mode')
+    return
+  }
+  
   // Idempotent: only load once
   if (clarityLoaded) return
   
   const clarityId = process.env.NEXT_PUBLIC_CLARITY_ID
   
   if (!clarityId) {
-    console.warn('NEXT_PUBLIC_CLARITY_ID not set. Clarity will not be loaded.')
+    console.warn('[Clarity] NEXT_PUBLIC_CLARITY_ID not set. Clarity will not be loaded.')
     return
   }
   
@@ -39,7 +45,7 @@ export function loadClarity(): void {
     })(window, document, 'clarity', 'script', clarityId)
     
     clarityInitialized = true
-    console.log('[Clarity] Script loaded with consent')
+    // Script loaded successfully
   } catch (error) {
     console.error('[Clarity] Failed to load:', error)
     clarityLoaded = false
