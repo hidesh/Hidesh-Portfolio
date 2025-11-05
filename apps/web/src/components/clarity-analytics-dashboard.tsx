@@ -313,18 +313,18 @@ export function ClarityAnalyticsDashboard() {
       </div>
 
       {/* TOP PAGES */}
-      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-6">
+      <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 sm:p-6">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Top Pages (Last 24h)</h3>
         <div className="space-y-3">
           {data.topPagesLast24h.map((page, index) => (
-            <div key={index} className="flex items-center justify-between p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
-              <div className="flex-1">
-                <div className="font-medium text-sm truncate text-gray-900 dark:text-gray-100">{page.url}</div>
+            <div key={index} className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 sm:gap-4 p-3 bg-gray-50 dark:bg-gray-900/50 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-900 transition-colors">
+              <div className="flex-1 min-w-0 w-full">
+                <div className="font-medium text-sm text-gray-900 dark:text-gray-100 break-all">{page.url}</div>
                 <div className="text-xs text-gray-500 dark:text-gray-400 mt-1">
                   {page.sessions} sessions • {page.avgScrollDepth}% scroll • {formatTime(page.engagementTime)} engagement
                 </div>
               </div>
-              <div className="ml-4 px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium">
+              <div className="px-3 py-1 bg-blue-100 dark:bg-blue-900/50 text-blue-700 dark:text-blue-300 rounded-full text-sm font-medium whitespace-nowrap flex-shrink-0">
                 #{index + 1}
               </div>
             </div>

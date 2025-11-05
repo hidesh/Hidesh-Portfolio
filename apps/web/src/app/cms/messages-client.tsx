@@ -170,18 +170,18 @@ export function MessagesClient() {
           {filteredMessages.map(message => (
               <div
                 key={message.id}
-                className={`p-6 bg-card border rounded-lg transition-all cursor-pointer hover:shadow-lg ${
+                className={`p-4 sm:p-6 bg-card border rounded-lg transition-all cursor-pointer hover:shadow-lg ${
                   selectedMessage?.id === message.id
                     ? 'border-branding-500 ring-2 ring-branding-500/20'
                     : 'border-branding-200 dark:border-branding-800'
                 }`}
                 onClick={() => setSelectedMessage(message)}
               >
-                <div className="flex items-start justify-between gap-4">
-                  <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3 mb-2">
-                      <h3 className="font-semibold text-foreground truncate">{message.name}</h3>
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium ${
+                <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+                  <div className="flex-1 min-w-0 w-full">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                      <h3 className="font-semibold text-foreground truncate max-w-full">{message.name}</h3>
+                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
                         message.handled 
                           ? 'text-green-600 bg-green-50 dark:bg-green-950' 
                           : 'text-blue-600 bg-blue-50 dark:bg-blue-950'
@@ -190,8 +190,8 @@ export function MessagesClient() {
                         {message.handled ? 'Handled' : 'Unhandled'}
                       </span>
                     </div>
-                    <p className="text-sm text-muted-foreground mb-2">{message.email}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-3">{message.message}</p>
+                    <p className="text-sm text-muted-foreground mb-2 truncate">{message.email}</p>
+                    <p className="text-sm text-muted-foreground line-clamp-3 break-words">{message.message}</p>
                     <p className="text-xs text-muted-foreground mt-2">
                       {new Date(message.created_at).toLocaleString('da-DK', {
                         dateStyle: 'medium',
@@ -200,15 +200,15 @@ export function MessagesClient() {
                     </p>
                   </div>
 
-                  <div className="flex gap-2">
+                  <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
                     <button
                       onClick={(e) => {
                         e.stopPropagation()
                         toggleHandled(message.id, message.handled)
                       }}
-                      className="px-3 py-1.5 bg-muted/50 border border-branding-200 dark:border-branding-800 rounded-lg text-sm hover:bg-muted transition-colors"
+                      className="flex-1 sm:flex-none px-3 py-1.5 bg-muted/50 border border-branding-200 dark:border-branding-800 rounded-lg text-xs sm:text-sm hover:bg-muted transition-colors whitespace-nowrap"
                     >
-                      {message.handled ? 'Mark Unhandled' : 'Mark Handled'}
+                      {message.handled ? 'Unhandled' : 'Handled'}
                     </button>
 
                     <button
@@ -216,7 +216,7 @@ export function MessagesClient() {
                         e.stopPropagation()
                         deleteMessage(message.id)
                       }}
-                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors"
+                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors flex-shrink-0"
                       title="Delete message"
                     >
                       <Trash2 className="h-4 w-4" />
