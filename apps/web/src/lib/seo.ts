@@ -94,6 +94,38 @@ export const siteConfig = {
 }
 
 /**
+ * JSON-LD Structured Data for Organization
+ * Helps Google display rich results for your brand
+ */
+export function getOrganizationSchema() {
+  return {
+    '@context': 'https://schema.org',
+    '@type': 'Organization',
+    name: siteConfig.name,
+    legalName: 'Hidesh Kumar',
+    url: siteConfig.url,
+    logo: `${siteConfig.url}/android-chrome-512x512.png`,
+    description: siteConfig.description,
+    email: siteConfig.email,
+    founder: {
+      '@type': 'Person',
+      name: siteConfig.name,
+    },
+    foundingDate: '2020',
+    sameAs: [
+      siteConfig.github,
+      siteConfig.linkedin,
+    ],
+    contactPoint: {
+      '@type': 'ContactPoint',
+      email: siteConfig.email,
+      contactType: 'Business Inquiries',
+      availableLanguage: ['English', 'Danish'],
+    },
+  }
+}
+
+/**
  * JSON-LD Structured Data for Person Schema
  * Helps Google understand who you are and your expertise
  */

@@ -9,7 +9,7 @@ import { ChristmasVideoBackground } from '@/components/christmas/christmas-video
 import { Header } from '@/components/header';
 import { Footer } from '@/components/footer';
 import { LayoutContent } from '@/components/layout-content';
-import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema, getWebPageSchema, getBreadcrumbSchema } from '@/lib/seo';
+import { siteConfig, getOpenGraphMetadata, getTwitterMetadata, getPersonSchema, getWebsiteSchema, getWebPageSchema, getBreadcrumbSchema, getOrganizationSchema } from '@/lib/seo';
 import type { Metadata } from 'next';
 
 import './globals.css';
@@ -36,6 +36,7 @@ export const metadata: Metadata = {
   authors: [{ name: siteConfig.author, url: siteConfig.url }],
   creator: siteConfig.author,
   publisher: siteConfig.author,
+  category: 'Technology',
   formatDetection: {
     email: false,
     address: false,
@@ -43,11 +44,17 @@ export const metadata: Metadata = {
   },
   applicationName: siteConfig.name,
   referrer: 'origin-when-cross-origin',
+  alternates: {
+    canonical: siteConfig.url,
+  },
   openGraph: getOpenGraphMetadata(),
   twitter: getTwitterMetadata(),
   robots: {
     index: true,
     follow: true,
+    'max-image-preview': 'large',
+    'max-snippet': -1,
+    'max-video-preview': -1,
     googleBot: {
       index: true,
       follow: true,
@@ -57,16 +64,33 @@ export const metadata: Metadata = {
     },
   },
   icons: {
-    icon: '/favicon.ico',
+    icon: [
+      { url: '/favicon.ico', sizes: 'any' },
+      { url: '/favicon-16x16.png', sizes: '16x16', type: 'image/png' },
+      { url: '/favicon-32x32.png', sizes: '32x32', type: 'image/png' },
+    ],
     shortcut: '/favicon-16x16.png',
-    apple: '/apple-touch-icon.png',
+    apple: [
+      { url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' },
+    ],
+    other: [
+      { rel: 'mask-icon', url: '/safari-pinned-tab.svg', color: '#8b5cf6' },
+    ],
   },
   manifest: '/manifest.json',
   verification: {
-    // Add your verification codes here after setting up
+    // Add your verification codes here after setting up Google Search Console
     // google: 'your-google-verification-code',
     // yandex: 'your-yandex-verification-code',
     // bing: 'your-bing-verification-code',
+  },
+  appleWebApp: {
+    capable: true,
+    title: siteConfig.name,
+    statusBarStyle: 'black-translucent',
+  },
+  other: {
+    'mobile-web-app-capable': 'yes',
   },
 };
 
@@ -79,6 +103,7 @@ export default function RootLayout({
   const websiteSchema = getWebsiteSchema();
   const webPageSchema = getWebPageSchema();
   const breadcrumbSchema = getBreadcrumbSchema();
+  const organizationSchema = getOrganizationSchema();
 
   return (
     <html lang="en" className={`${inter.variable} ${eduFont.variable}`} suppressHydrationWarning>
@@ -91,7 +116,13 @@ export default function RootLayout({
         {/* ALTCHA Widget Script */}
         <script type="module" src="https://cdn.jsdelivr.net/npm/altcha@latest/dist/altcha.min.js" async />
         
-        {/* JSON-LD Structured Data for Google Sitelinks */}
+        {/* JSON-LD Structured Data for Google Rich Results */}
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{
+            __html: JSON.stringify(organizationSchema),
+          }}
+        />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
