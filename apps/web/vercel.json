@@ -1,0 +1,15 @@
+{
+  "redirects": [
+    {
+      "source": "/:path*",
+      "destination": "https://www.hidesh.com/:path*",
+      "permanent": true,
+      "has": [
+        {
+          "type": "host",
+          "value": "hidesh.com"
+        }
+      ]
+    }
+  ]
+}

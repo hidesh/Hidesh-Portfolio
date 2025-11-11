@@ -57,7 +57,22 @@ export async function updateSession(request: NextRequest) {
 }
 
 export async function middleware(request: NextRequest) {
-  return await updateSession(request);
+  // Skip middleware for search engine bots to avoid redirect confusion
+  const userAgent = request.headers.get('user-agent')?.toLowerCase() || ''
+  const isBot = /googlebot|bingbot|slurp|duckduckbot|baiduspider|yandexbot|sogou|exabot|facebot|ia_archiver/i.test(userAgent)
+  
+  // Skip middleware for static assets and API routes
+  const path = request.nextUrl.pathname
+  if (
+    path.startsWith('/_next') ||
+    path.startsWith('/api') ||
+    path.match(/\.(ico|png|jpg|jpeg|gif|svg|webp|avif|css|js|json|xml|txt)$/) ||
+    isBot
+  ) {
+    return NextResponse.next()
+  }
+  
+  return await updateSession(request)
 }
 
 export const config = {
