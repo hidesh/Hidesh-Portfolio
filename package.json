@@ -36,6 +36,11 @@
     "pnpm": ">=8.0.0"
   },
   "packageManager": "pnpm@8.15.4",
+  "pnpm": {
+    "overrides": {
+      "eslint": "^9"
+    }
+  },
   "lint-staged": {
     "**/*.{ts,tsx,js,jsx}": [
       "eslint --fix",
