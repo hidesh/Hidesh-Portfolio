@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
 import { MessagesClient } from './messages-client'
+import { MediaClient } from './media-client'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { 
   Plus, 
@@ -26,7 +27,8 @@ import {
   Home,
   Menu,
   ChevronLeft,
-  Mail
+  Mail,
+  Image as ImageIcon
 } from 'lucide-react'
 
 interface Post {
@@ -47,8 +49,8 @@ interface Post {
 
 // Sidebar Navigation Component
 function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSidebarOpen, user }: {
-  activeTab: 'posts' | 'analytics' | 'messages'
-  setActiveTab: (tab: 'posts' | 'analytics' | 'messages') => void
+  activeTab: 'posts' | 'analytics' | 'messages' | 'media'
+  setActiveTab: (tab: 'posts' | 'analytics' | 'messages' | 'media') => void
   onSignOut: () => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
@@ -59,6 +61,7 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
   const sidebarItems = [
     { id: 'posts', label: 'Posts', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
+    { id: 'media', label: 'Media', icon: ImageIcon },
     { id: 'messages', label: 'Messages', icon: Mail },
   ]
 
@@ -103,7 +106,7 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
                   <li key={item.id}>
                     <button
                       onClick={() => {
-                        setActiveTab(item.id as 'posts' | 'analytics' | 'messages')
+                        setActiveTab(item.id as 'posts' | 'analytics' | 'messages' | 'media')
                         setSidebarOpen(false)
                       }}
                       className={`
@@ -164,7 +167,7 @@ export default function CMSPage() {
   const [loading, setLoading] = useState(true)
   const [showEditor, setShowEditor] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
-  const [activeTab, setActiveTab] = useState<'posts' | 'analytics' | 'messages'>('posts')
+  const [activeTab, setActiveTab] = useState<'posts' | 'analytics' | 'messages' | 'media'>('posts')
   const [sidebarOpen, setSidebarOpen] = useState(false)
   
   const router = useRouter()
@@ -480,6 +483,12 @@ export default function CMSPage() {
             {activeTab === 'analytics' && (
               <div className="p-4 h-full overflow-auto">
                 <ClarityAnalyticsDashboard />
+              </div>
+            )}
+
+            {activeTab === 'media' && (
+              <div className="h-full overflow-auto">
+                <MediaClient />
               </div>
             )}
 

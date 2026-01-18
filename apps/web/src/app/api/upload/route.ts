@@ -5,6 +5,7 @@ export async function POST(request: NextRequest) {
   try {
     const formData = await request.formData()
     const file = formData.get('file') as File
+    const altText = formData.get('altText') as string
     
     if (!file) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
@@ -28,11 +29,15 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Generate unique filename
+    // Generate SEO-friendly filename from alt text or original filename
     const fileExt = file.name.split('.').pop()
+    const baseName = (altText || file.name.replace(/\.[^/.]+$/, ''))
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dashes
+      .replace(/^-+|-+$/g, '') // Remove leading/trailing dashes
+      .substring(0, 50) // Limit length
     const timestamp = Date.now()
-    const randomString = Math.random().toString(36).substring(2, 15)
-    const fileName = `${timestamp}-${randomString}.${fileExt}`
+    const fileName = `${baseName}-${timestamp}.${fileExt}`
 
     // Upload to Supabase Storage
     const supabase = createServiceClient()
