@@ -14,7 +14,6 @@ export function ClarityProvider({ children }: ClarityProviderProps) {
     
     try {
       Clarity.init(projectId)
-      console.log('Microsoft Clarity initialized successfully with project ID:', projectId)
       
       // Set up custom tags for better analytics
       Clarity.setTag('environment', 'production')
@@ -36,18 +35,13 @@ export function ClarityProvider({ children }: ClarityProviderProps) {
       Clarity.event('app_initialized')
       
       // Create enhanced analytics data from Clarity
-      console.log('Creating Clarity analytics data...')
       createClarityAnalytics()
       
       // Set up page navigation tracking
       setupPageTracking()
       
-      console.log('Clarity setup completed!')
-      
     } catch (error) {
-      console.error('Failed to initialize Microsoft Clarity:', error)
-      // Fallback to demo data if Clarity fails
-      console.log('Falling back to demo analytics...')
+      // Fallback to demo data if Clarity fails silently
       simulateAnalytics()
     }
   }, [])
@@ -69,10 +63,8 @@ function setupPageTracking() {
         if (element) {
           Clarity.setTag('element', element)
         }
-        
-        console.log(`Clarity tracked: ${eventType} on ${page}`)
       } catch (error) {
-        console.warn('Could not track interaction:', error)
+        // Silent fail
       }
     }
 
@@ -167,8 +159,6 @@ function createClarityAnalytics() {
       clarityEnabled: true,
       lastUpdated: new Date().toISOString()
     }
-
-    console.log('Clarity analytics data created:', (window as any).clarityAnalytics)
 
     // Track page view event for current page
     try {

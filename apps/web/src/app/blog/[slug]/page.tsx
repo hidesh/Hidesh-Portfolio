@@ -1,9 +1,10 @@
 import { createClient } from '@/lib/supabase/server';
-import { notFound } from 'next/navigation';
+import { notFound, redirect } from 'next/navigation';
 import { Metadata } from 'next';
 import Link from 'next/link';
-import { ArrowLeft } from 'lucide-react';
+import { ArrowLeft, Clock } from 'lucide-react';
 import { getBlogPostMetadata, siteConfig } from '@/lib/seo';
+import { MarkdownViewer } from '@/components/ui/markdown-viewer';
 
 interface BlogPost {
   id: string;
@@ -72,6 +73,11 @@ export default async function BlogPostPage({ params }: PageProps) {
     notFound();
   }
 
+  // Redirect to blog list if post is not published (draft)
+  if (!post.published_at) {
+    redirect('/blog');
+  }
+
   return (
     <div className="min-h-screen bg-background">
       <div className="container mx-auto px-4 py-16 max-w-4xl">
@@ -117,11 +123,8 @@ export default async function BlogPostPage({ params }: PageProps) {
             )}
           </header>
 
-          <div className="text-foreground leading-relaxed">
-            {/* For now, render content as text. In a real app, you'd use a markdown parser */}
-            <div className="whitespace-pre-wrap">
-              {post.body_mdx}
-            </div>
+          <div className="mb-8">
+            <MarkdownViewer content={post.body_mdx} />
           </div>
         </article>
 
@@ -129,13 +132,14 @@ export default async function BlogPostPage({ params }: PageProps) {
           <div className="flex justify-between items-center">
             <Link 
               href="/blog"
-              className="inline-flex items-center text-branding-600 hover:text-branding-700 transition-colors"
+              className="inline-flex items-center text-primary hover:text-primary/80 transition-colors font-medium"
             >
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to all posts
             </Link>
             
-            <div className="text-sm text-muted-foreground">
+            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+              <Clock className="w-4 h-4" />
               Last updated: {new Date(post.updated_at).toLocaleDateString('en-US', {
                 year: 'numeric',
                 month: 'long',

@@ -48,6 +48,18 @@ coverage
 
 # Database
 *.sqlite
+
+# Temporary/test SQL files (migrations should be in supabase/migrations/)
+*_test.sql
+*_temp.sql
+*_backup.sql
+enable_rls.sql
+supabase_rls_fix.sql
+test_blog.sql
+fix_rls_security.sh
+
+# Supabase schema dumps (for reference only, use migrations/)
+**/supabase-schema.sql
 *.db
 
 # Large media files (use Vercel Blob instead)

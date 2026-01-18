@@ -12,7 +12,7 @@ export default function AnalyticsTracker() {
   }, []);
 
   useEffect(() => {
-    if (!isClient) return;
+    if (!isClient || !pathname) return;
     
     // Dynamically import analytics to avoid SSR issues
     import('@/lib/analytics').then(({ analytics }) => {

@@ -29,7 +29,6 @@ export function ContactForm() {
     if (!widgetLoaded) return
 
     const handleStateChange = (ev: CustomEvent) => {
-      console.log('ALTCHA State:', ev.detail)
       if (ev.detail.state === 'verified') {
         setAltchaPayload(ev.detail.payload)
       } else {
@@ -58,8 +57,6 @@ export function ContactForm() {
       setErrorMessage('Please complete the CAPTCHA verification')
       return
     }
-
-    console.log('Submitting with payload:', altchaPayload)
 
     try {
       const response = await fetch('/api/contact', {

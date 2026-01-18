@@ -7,6 +7,7 @@ import Link from 'next/link'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
 import { MessagesClient } from './messages-client'
+import { MarkdownEditor } from '@/components/ui/markdown-editor'
 import { 
   Plus, 
   Edit3, 
@@ -493,96 +494,21 @@ export default function CMSPage() {
 
       {/* Post Editor Modal */}
       {showEditor && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-card rounded-lg w-full max-w-4xl max-h-[90vh] overflow-hidden">
-            <div className="flex items-center justify-between p-4 border-b border-border">
-              <h2 className="text-lg font-semibold text-foreground">
-                {editingPost ? 'Edit Post' : 'New Post'}
-              </h2>
-              <button
-                onClick={resetEditor}
-                className="text-muted-foreground hover:text-foreground"
-              >
-                <X className="w-5 h-5" />
-              </button>
-            </div>
-            
-            <div className="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background text-foreground"
-                  placeholder="Enter post title..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Excerpt</label>
-                <textarea
-                  value={summary}
-                  onChange={(e) => setSummary(e.target.value)}
-                  rows={2}
-                  className="w-full px-3 py-2 border border-border rounded bg-background text-foreground"
-                  placeholder="Brief description..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Content</label>
-                <textarea
-                  value={content}
-                  onChange={(e) => setContent(e.target.value)}
-                  rows={8}
-                  className="w-full px-3 py-2 border border-border rounded bg-background text-foreground font-mono text-sm"
-                  placeholder="Write your post content..."
-                />
-              </div>
-              
-              <div>
-                <label className="block text-sm font-medium text-foreground mb-1">Tags</label>
-                <input
-                  type="text"
-                  value={tags}
-                  onChange={(e) => setTags(e.target.value)}
-                  className="w-full px-3 py-2 border border-border rounded bg-background text-foreground"
-                  placeholder="react, typescript, nextjs (comma separated)"
-                />
-              </div>
-              
-              <div className="flex items-center">
-                <input
-                  type="checkbox"
-                  id="published"
-                  checked={isPublished}
-                  onChange={(e) => setIsPublished(e.target.checked)}
-                  className="h-4 w-4 text-branding-600"
-                />
-                <label htmlFor="published" className="ml-2 text-sm text-foreground">
-                  Publish immediately
-                </label>
-              </div>
-            </div>
-            
-            <div className="flex items-center justify-end space-x-3 p-4 border-t border-border">
-              <button
-                onClick={resetEditor}
-                className="px-4 py-2 text-muted-foreground hover:text-foreground"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handleSavePost}
-                className="flex items-center px-4 py-2 bg-branding-600 text-white rounded hover:bg-branding-700"
-              >
-                <Save className="w-4 h-4 mr-2" />
-                {editingPost ? 'Update' : 'Create'} Post
-              </button>
-            </div>
-          </div>
-        </div>
+        <MarkdownEditor
+          value={content}
+          onChange={setContent}
+          onSave={handleSavePost}
+          onCancel={resetEditor}
+          title={title}
+          onTitleChange={setTitle}
+          excerpt={summary}
+          onExcerptChange={setSummary}
+          tags={tags}
+          onTagsChange={setTags}
+          isPublished={isPublished}
+          onPublishedChange={setIsPublished}
+          editMode={!!editingPost}
+        />
       )}
     </div>
   )

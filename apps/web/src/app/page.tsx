@@ -1,14 +1,17 @@
-import React from 'react'
+import React, { Suspense } from 'react'
+import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import ScrollStack from '@/components/ui/scroll-stack-clean'
-import { CareerPath } from '@/components/ui/career-path'
-import ThemeBackground from '@/components/ui/theme-background'
-import { ErrorBoundary } from '@/components/ui/error-boundary'
-import Orb from '@/components/ui/orb'
-import { ContactForm } from '@/components/contact-form'
 import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 import { siteConfig, getOpenGraphMetadata, getTwitterMetadata } from '@/lib/seo'
+
+// Lazy load kun client komponenter med loading states
+const ScrollStack = dynamic(() => import('@/components/ui/scroll-stack-clean'))
+const CareerPath = dynamic(() => import('@/components/ui/career-path').then(mod => ({ default: mod.CareerPath })))
+const ThemeBackground = dynamic(() => import('@/components/ui/theme-background'))
+const ErrorBoundary = dynamic(() => import('@/components/ui/error-boundary').then(mod => ({ default: mod.ErrorBoundary })))
+const Orb = dynamic(() => import('@/components/ui/orb'))
+const ContactForm = dynamic(() => import('@/components/contact-form').then(mod => ({ default: mod.ContactForm })))
 
 interface Project {
   id: string

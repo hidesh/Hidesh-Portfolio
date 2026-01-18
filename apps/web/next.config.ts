@@ -6,16 +6,19 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === 'production',
   },
   
-  // Enable source maps for production debugging
-  productionBrowserSourceMaps: true,
+  // Disable source maps in production for better performance
+  productionBrowserSourceMaps: false,
   
   // Enhanced image optimization
   images: {
     formats: ['image/avif', 'image/webp'],
     deviceSizes: [640, 750, 828, 1080, 1200, 1920, 2048, 3840],
     imageSizes: [16, 32, 48, 64, 96, 128, 256, 384],
+    dangerouslyAllowSVG: true,
+    contentDispositionType: 'attachment',
+    contentSecurityPolicy: "default-src 'self'; script-src 'none'; sandbox;",
+    minimumCacheTTL: 31536000, // 1 year cache
     qualities: [75, 90, 100],
-    minimumCacheTTL: 60,
     remotePatterns: [
       {
         protocol: 'https',
@@ -30,11 +33,14 @@ const nextConfig: NextConfig = {
   
   // Bundle optimizations
   experimental: {
-    optimizePackageImports: ['lucide-react', '@supabase/supabase-js', 'react-snowfall'],
     webVitalsAttribution: ['CLS', 'LCP'],
+    optimizePackageImports: ['lucide-react', '@microsoft/clarity', 'react-markdown'],
   },
   
-  // Webpack config for altcha
+  // Turbopack config for Next.js 16+ (empty config to silence warning)
+  turbopack: {},
+  
+  // Webpack config for backwards compatibility (when using --webpack flag)
   webpack: (config, { isServer }) => {
     if (!isServer) {
       config.resolve.fallback = {
@@ -44,6 +50,11 @@ const nextConfig: NextConfig = {
         tls: false,
       }
     }
+    
+    // Ensure proper module resolution
+    config.module = config.module || {}
+    config.module.exprContextCritical = false
+    
     return config
   },
   async headers() {
@@ -70,6 +81,10 @@ const nextConfig: NextConfig = {
           {
             key: 'X-DNS-Prefetch-Control',
             value: 'on',
+          },
+          {
+            key: 'Strict-Transport-Security',
+            value: 'max-age=63072000; includeSubDomains; preload',
           },
         ],
       },
@@ -106,6 +121,15 @@ const nextConfig: NextConfig = {
           {
             key: 'Cache-Control',
             value: 'public, max-age=604800, stale-while-revalidate=86400',
+          },
+        ],
+      },
+      {
+        source: '/:path*.{js,css,woff,woff2,ttf,otf}',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
           },
         ],
       },
