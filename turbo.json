@@ -11,7 +11,9 @@
     "CONTACT_EMAIL",
     "RESEND_API_KEY",
     "NEXT_PUBLIC_API_URL",
-    "NEXT_PUBLIC_VERCEL_ANALYTICS_ID"
+    "NEXT_PUBLIC_VERCEL_ANALYTICS_ID",
+    "BLOB_READ_WRITE_TOKEN",
+    "ALTCHA_HMAC_KEY"
   ],
   "tasks": {
     "build": {
@@ -25,7 +27,9 @@
         "NEXT_PUBLIC_CLARITY_PROJECT_ID",
         "CLARITY_API_TOKEN",
         "CONTACT_EMAIL",
-        "RESEND_API_KEY"
+        "RESEND_API_KEY",
+        "BLOB_READ_WRITE_TOKEN",
+        "ALTCHA_HMAC_KEY"
       ]
     },
     "dev": {
