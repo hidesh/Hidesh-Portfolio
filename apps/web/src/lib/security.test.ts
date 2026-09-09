@@ -18,6 +18,13 @@ test('CAPTCHA fails closed without a configured secret', async () => {
 
 test('CAPTCHA accepts real work and rejects tampering, expiry, and invalid counters', async () => {
   const challenge = await generateAltchaChallenge()
+  const expires = Number(
+    new URLSearchParams(challenge.salt.split('?')[1]).get('expires')
+  )
+  const browserDelay = expires * 1000 - Date.now()
+  expect(browserDelay).toBeGreaterThan(298000)
+  expect(browserDelay).toBeLessThanOrEqual(300000)
+  expect(browserDelay).toBeLessThan(2147483647)
   let number = 0
   while (
     createHash('sha256')
@@ -41,7 +48,7 @@ test('CAPTCHA accepts real work and rejects tampering, expiry, and invalid count
     await verifyAltchaSolution(
       encode({
         ...solution,
-        salt: solution.salt.replace(/expires=\d+/, 'expires=1000000000000'),
+        salt: solution.salt.replace(/expires=\d+/, 'expires=1000000000'),
       })
     )
   ).toBe(false)

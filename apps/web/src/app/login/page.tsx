@@ -2,6 +2,7 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
+import { restoreAdminSession } from '@/lib/supabase/admin-session'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
@@ -15,33 +16,41 @@ export default function LoginPage() {
   const [error, setError] = useState('')
   const router = useRouter()
 
-
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
         const supabase = createClient()
-        const { data: { user } } = await supabase.auth.getUser()
+        const {
+          data: { user },
+        } = await supabase.auth.getUser()
 
-        
-        if (user?.app_metadata?.role === 'admin') {
+        if (user) {
+          await restoreAdminSession(supabase)
           const urlParams = new URLSearchParams(window.location.search)
           const requested = urlParams.get('redirectedFrom')
-          const redirectTo = requested === '/cms' || requested?.startsWith('/cms/') ? requested : '/cms'
+          const redirectTo =
+            requested === '/cms' || requested?.startsWith('/cms/')
+              ? requested
+              : '/cms'
           router.push(redirectTo)
         } else {
           setChecking(false)
         }
       } catch (error) {
-        console.error('Auth check error:', error)
+        setError(
+          error instanceof Error
+            ? error.message
+            : 'Could not check your session.'
+        )
         setChecking(false)
       }
     }
-    
+
     checkAuth()
   }, [])
 
-    const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
     setError('')
@@ -57,18 +66,18 @@ export default function LoginPage() {
         throw new Error(error.message)
       }
 
-      const { data: { user } } = await supabase.auth.getUser()
-      if (user?.app_metadata?.role !== 'admin') {
-        await supabase.auth.signOut()
-        throw new Error('This account does not have administrator access.')
-      }
+      await restoreAdminSession(supabase)
       // Get redirect URL from search params or default to /cms
       const urlParams = new URLSearchParams(window.location.search)
       const requested = urlParams.get('redirectedFrom')
-          const redirectTo = requested === '/cms' || requested?.startsWith('/cms/') ? requested : '/cms'
+      const redirectTo =
+        requested === '/cms' || requested?.startsWith('/cms/')
+          ? requested
+          : '/cms'
       router.push(redirectTo)
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed'
+      const errorMessage =
+        error instanceof Error ? error.message : 'Login failed'
       setError(errorMessage)
     } finally {
       setLoading(false)
@@ -81,7 +90,9 @@ export default function LoginPage() {
       <div className="min-h-screen bg-background flex items-center justify-center">
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-branding-600 mx-auto"></div>
-          <p className="text-muted-foreground mt-4">Checking authentication...</p>
+          <p className="text-muted-foreground mt-4">
+            Checking authentication...
+          </p>
         </div>
       </div>
     )
@@ -96,8 +107,12 @@ export default function LoginPage() {
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-branding-500 to-branding-700 rounded-full mb-4">
               <Lock className="h-8 w-8 text-white" />
             </div>
-            <h1 className="text-2xl font-bold text-foreground mb-2">Admin Login</h1>
-            <p className="text-muted-foreground">Sign in to access the CMS dashboard</p>
+            <h1 className="text-2xl font-bold text-foreground mb-2">
+              Admin Login
+            </h1>
+            <p className="text-muted-foreground">
+              Sign in to access the CMS dashboard
+            </p>
           </div>
 
           {/* Error Message */}
@@ -111,7 +126,10 @@ export default function LoginPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Email Field */}
             <div>
-              <label htmlFor="email" className="block text-sm font-medium text-foreground mb-2">
+              <label
+                htmlFor="email"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
                 Email Address
               </label>
               <div className="relative">
@@ -120,7 +138,7 @@ export default function LoginPage() {
                   id="email"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={e => setEmail(e.target.value)}
                   required
                   className="w-full pl-10 pr-4 py-3 bg-background text-foreground border border-branding-200 dark:border-branding-800 rounded-lg focus:ring-2 focus:ring-branding-500 focus:border-transparent transition-all placeholder:text-muted-foreground"
                   placeholder="Enter your email"
@@ -130,7 +148,10 @@ export default function LoginPage() {
 
             {/* Password Field */}
             <div>
-              <label htmlFor="password" className="block text-sm font-medium text-foreground mb-2">
+              <label
+                htmlFor="password"
+                className="block text-sm font-medium text-foreground mb-2"
+              >
                 Password
               </label>
               <div className="relative">
@@ -139,7 +160,7 @@ export default function LoginPage() {
                   id="password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  onChange={e => setPassword(e.target.value)}
                   required
                   className="w-full pl-10 pr-12 py-3 bg-background text-foreground border border-branding-200 dark:border-branding-800 rounded-lg focus:ring-2 focus:ring-branding-500 focus:border-transparent transition-all placeholder:text-muted-foreground"
                   placeholder="Enter your password"
@@ -149,7 +170,11 @@ export default function LoginPage() {
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
-                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
+                  {showPassword ? (
+                    <EyeOff className="h-5 w-5" />
+                  ) : (
+                    <Eye className="h-5 w-5" />
+                  )}
                 </button>
               </div>
             </div>
@@ -166,7 +191,7 @@ export default function LoginPage() {
 
           {/* Footer */}
           <div className="mt-8 text-center">
-            <Link 
+            <Link
               href="/"
               className="text-sm text-muted-foreground hover:text-branding-600 transition-colors"
             >

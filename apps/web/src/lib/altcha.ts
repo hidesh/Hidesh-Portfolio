@@ -21,7 +21,7 @@ export interface AltchaChallenge {
 }
 export async function generateAltchaChallenge(): Promise<AltchaChallenge> {
   const key = getKey()
-  const salt = `${randomBytes(16).toString('hex')}?expires=${Date.now() + 300000}`
+  const salt = `${randomBytes(16).toString('hex')}?expires=${Math.floor(Date.now() / 1000) + 300}`
   const maxnumber = 50000
   const challenge = createHash('sha256')
     .update(salt + randomInt(maxnumber + 1))
@@ -46,7 +46,7 @@ export async function verifyAltchaSolution(payload: string): Promise<boolean> {
       number < 0 ||
       number > 50000 ||
       typeof salt !== 'string' ||
-      !/^[a-f0-9]{32}\?expires=\d{13}$/.test(salt)
+      !/^[a-f0-9]{32}\?expires=\d{10}$/.test(salt)
     )
       return false
     if (
@@ -57,7 +57,8 @@ export async function verifyAltchaSolution(payload: string): Promise<boolean> {
     )
       return false
     const expires = Number(salt.split('=')[1])
-    if (expires < Date.now() || expires > Date.now() + 300000) return false
+    const now = Math.floor(Date.now() / 1000)
+    if (expires <= now || expires > now + 300) return false
     const expected = createHmac('sha256', getKey()).update(challenge).digest()
     return (
       timingSafeEqual(Buffer.from(signature, 'hex'), expected) &&

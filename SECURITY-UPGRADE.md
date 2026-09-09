@@ -17,7 +17,7 @@ Forsiden har fået nyt layout, tydeligere projektpræsentationer, kortere tekst,
 Der er ikke adgang til din live-Supabase/Vercel-konfiguration i denne opgave. Følgende er derfor **ikke udført live**:
 
 1. Brug Node.js 22 eller 24 og pnpm 8.15.4. Kør `pnpm install --frozen-lockfile`.
-2. Sæt din rigtige Supabase-administratorbrugers **app_metadata** til at indeholde `"role": "admin"` via en betroet Supabase-administrator. Brug ikke user_metadata eller profiles.role. Log ind igen, så sessionen afspejler rollen. Bekræft også, at brugerens auth-id har en tilsvarende profiles-række, da posts.author_id refererer til profiles.
+2. Log ind med ejerens eksisterende Supabase-konto. Efter korrekt login gendanner serveren automatisk `app_metadata.role = admin` for den bekræftede, ikke-anonyme konto `hidesh@live.dk`, og browseren opdaterer sessionens JWT. Dette kræver den eksisterende SUPABASE_SERVICE_ROLE_KEY; adgangskode og bruger-id ændres ikke. Andre konti får ikke automatisk administratoradgang. Bekræft også, at brugerens auth-id har en tilsvarende profiles-række, da posts.author_id refererer til profiles.
 3. Kør først `supabase/migrations/20260909210000_harden_portfolio_access.sql` og derefter `supabase/migrations/20260909220000_contact_spam_protection.sql` på den eksisterende database. Den forudsætter eksisterende `published_at`-kolonner, som applikationen allerede bruger. Test migration og admin-adgang i staging først. Gamle migrationer har modstridende skemaer og bør ikke genafspilles blindt på en ny database.
 4. Sæt NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, CONTACT_EMAIL og ALTCHA_HMAC_KEY. Lokalt placeres værdier i apps/web/.env.local; på Vercel i projektets miljøvariabler. ALTCHA_HMAC_KEY skal være en unik tilfældig hemmelighed på mindst 32 tegn. Generér f.eks. med `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`.
 5. Sæt eventuelle Clarity-variabler. Kontroller en rigtig admin-session, upload/omdøbning, blogredigering og kontaktbesked i staging. En kontaktformular uden migration/konfiguration afviser sikkert og viser en alternativ e-mailadresse.
@@ -27,11 +27,17 @@ Der er ikke adgang til din live-Supabase/Vercel-konfiguration i denne opgave. F�
 
 - pnpm audit: **0 kendte sårbarheder**, 1.105 dependencies, inklusive udviklingsdependencies. Ingen advisories er undertrykt.
 - Hele monorepoets produktionsbuild og TypeScript-kontrol er kørt med succes.
-- 37 tests for adgangskontrol, alle ni beskyttede API-handlers, CAPTCHA, JSON-grænser og sidens centrale navigation.
+- 46 tests for adgangskontrol, API-handlers, CAPTCHA, JSON-grænser, sidens centrale navigation og gendannelse af ejerens administratorrolle med opdatering af sessionen.
 - Edge/Chromium: 320, 390, 768 og 1440 pixelbredder, lys/mørk tilstand, mobilmenu/Escape, 3D-pause, reduceret bevægelse og en rigtig lokal CAPTCHA-løsning. Ingen pageerrors eller vandret overflow. Ingen rigtige kontaktbeskeder blev sendt.
 - `node scripts/verify-portfolio.cjs` gentager browserkontrollen mod en kørende lokal server på port 3000 (PREVIEW_URL og BROWSER_CHANNEL kan ændres). Serveren skal have en lokal ALTCHA_HMAC_KEY. Screenshots gemmes i .npm-cache.
 - Repoets fulde ESLint-kontrol er fortsat ikke grøn: eksisterende `any`-typer, React Hooks-regler og ældre komponenter kræver separat oprydning. Reglerne er ikke slået fra for at skjule dette. Den gamle CI indeholder også legacy E2E-/formatkrav, som ikke er fuldt valideret i denne opgave.
 - Live RLS, admin-sessioner, e-maillevering og rigtige Safari/Firefox-enheder er ikke verificeret. En ren dependency-audit er ikke en garanti for, at alle mulige sikkerhedsproblemer er fundet.
+
+## Rettelser efter fejlrapport fra iPhone
+
+CAPTCHA-challengens `expires` sendes nu som Unix-sekunder, som ALTCHA forventer. Millisekunder fik widgettens udløbstimer til at overskride browserens timergrænse og udløbe næsten straks. Serverkontrollen bruger samme enhed. `scripts/verify-captcha-expiry.cjs` er kørt med Chromium og WebKit i mobilstørrelse: en løst CAPTCHA forbliver gyldig efter 20 sekunder og udløber efter fem minutter. Testen bruger browserens virtuelle ur; den er ikke en test på en fysisk iPhone. WebKit installeres med `playwright install webkit`; scriptet kræver en kørende lokal server med ALTCHA_HMAC_KEY.
+
+Login-afvisningen skyldtes det nye administratorrollekrav, ikke en ændret adgangskode. Den nye same-origin-endpoint `/api/auth/admin-session` verificerer brugeren hos Supabase før gendannelse af ejerrollen. Tests dækker også afvisning af andre, ubekræftede og anonyme konti samt fejl fra serveren. Rettelserne er bygget og testet lokalt; ejerens rigtige live-login og deployment er ikke udført i denne opgave.
 
 ## Kilder
 
