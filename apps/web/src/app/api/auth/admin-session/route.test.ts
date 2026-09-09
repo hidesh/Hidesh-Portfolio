@@ -26,17 +26,15 @@ beforeEach(() => {
   })
   updateUserById.mockResolvedValue({ error: null })
 })
-test('restores verified owner role without changing password, ID, or other metadata', async () => {
+test('does not restore a revoked owner role even with a confirmed email', async () => {
   setUser({
     id: 'existing-owner-id',
     email: 'hidesh@live.dk',
     email_confirmed_at: '2024-01-01',
     app_metadata: { provider: 'email' },
   })
-  expect((await POST(request())).status).toBe(200)
-  expect(updateUserById).toHaveBeenCalledWith('existing-owner-id', {
-    app_metadata: { provider: 'email', role: 'admin' },
-  })
+  expect((await POST(request())).status).toBe(403)
+  expect(createServiceClient).not.toHaveBeenCalled()
 })
 test.each([
   null,
@@ -65,12 +63,24 @@ test('rejects cross-origin access', async () => {
   expect((await POST(request('https://attacker.test'))).status).toBe(403)
   expect(createClient).not.toHaveBeenCalled()
 })
-test('reports server setup failure instead of blaming the password', async () => {
-  setUser({
-    id: 'owner',
-    email: 'hidesh@live.dk',
-    email_confirmed_at: '2024-01-01',
+test('fails closed on an authentication service failure', async () => {
+  ;(createClient as jest.Mock).mockRejectedValue(
+    new Error('private internal detail')
+  )
+  const response = await POST(request())
+  expect(response.status).toBe(503)
+  expect(await response.text()).not.toContain('private internal detail')
+  expect(createServiceClient).not.toHaveBeenCalled()
+})
+
+test('rejects an untrusted user when Supabase returns an error', async () => {
+  ;(createClient as jest.Mock).mockResolvedValue({
+    auth: {
+      getUser: jest.fn().mockResolvedValue({
+        data: { user: { app_metadata: { role: 'admin' } } },
+        error: new Error('Invalid token'),
+      }),
+    },
   })
-  updateUserById.mockResolvedValue({ error: new Error('server failure') })
-  expect((await POST(request())).status).toBe(503)
+  expect((await POST(request())).status).toBe(401)
 })

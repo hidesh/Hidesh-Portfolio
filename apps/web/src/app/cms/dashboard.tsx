@@ -3,32 +3,25 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
 import { useRouter, usePathname } from 'next/navigation'
-import Link from 'next/link'
+import '../admin.css'
+import type { User } from '@supabase/supabase-js'
 import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { ClarityAnalyticsDashboard } from '@/components/clarity-analytics-dashboard'
 import { MessagesClient } from './messages-client'
 import { MediaClient } from './media-client'
 import { MarkdownEditor } from '@/components/ui/markdown-editor'
-import { 
-  Plus, 
-  Edit3, 
-  Trash2, 
-  Eye, 
-  Save, 
-  X, 
-  BarChart3, 
-  Users, 
+import {
+  Plus,
+  Edit3,
+  Trash2,
+  BarChart3,
   FileText,
-  TrendingUp,
-  Calendar,
-  Globe,
   LogOut,
-  Settings,
   Home,
   Menu,
   ChevronLeft,
   Mail,
-  Image as ImageIcon
+  Image as ImageIcon,
 } from 'lucide-react'
 
 interface Post {
@@ -45,19 +38,31 @@ interface Post {
   author_id?: string
 }
 
-
-
 // Sidebar Navigation Component
-function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSidebarOpen, user }: {
+function CMSSidebar({
+  activeTab,
+  setActiveTab,
+  onSignOut,
+  sidebarOpen,
+  setSidebarOpen,
+  user,
+}: {
   activeTab: 'posts' | 'analytics' | 'messages' | 'media'
   setActiveTab: (tab: 'posts' | 'analytics' | 'messages' | 'media') => void
   onSignOut: () => void
   sidebarOpen: boolean
   setSidebarOpen: (open: boolean) => void
-  user: any
+  user: User | null
 }) {
-  const pathname = usePathname()
-  
+  useEffect(() => {
+    if (!sidebarOpen) return
+    const close = (event: KeyboardEvent) => {
+      if (event.key === 'Escape') setSidebarOpen(false)
+    }
+    window.addEventListener('keydown', close)
+    return () => window.removeEventListener('keydown', close)
+  }, [sidebarOpen, setSidebarOpen])
+
   const sidebarItems = [
     { id: 'posts', label: 'Posts', icon: FileText },
     { id: 'analytics', label: 'Analytics', icon: BarChart3 },
@@ -69,25 +74,31 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
     <>
       {/* Mobile overlay */}
       {sidebarOpen && (
-        <div 
+        <div
           className="fixed inset-0 bg-black/50 z-40 lg:hidden"
           onClick={() => setSidebarOpen(false)}
         />
       )}
-      
+
       {/* Sidebar */}
-      <div className={`
-        fixed top-0 left-0 z-50 h-full w-64 bg-card border-r border-border transform transition-transform duration-200 ease-in-out
-        ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-        lg:translate-x-0 lg:static lg:z-0
-      `}>
+      <div
+        className={`
+        fixed top-0 left-0 z-50 h-dvh w-64 shrink-0 bg-card border-r border-border transform transition-transform duration-200 ease-in-out
+        ${sidebarOpen ? 'translate-x-0 visible' : '-translate-x-full invisible lg:visible'}
+        lg:translate-x-0 lg:sticky lg:top-0 lg:z-0
+      `}
+      >
         <div className="flex flex-col h-full">
           {/* Header */}
           <div className="p-6 border-b border-border">
             <div className="flex items-center justify-between">
-              <h1 className="text-xl font-bold text-foreground">CMS Dashboard</h1>
+              <h1 className="text-xl font-bold text-foreground">
+                Hidesh Studio
+                <span className="studio-caption">PORTFOLIO WORKSPACE</span>
+              </h1>
               <button
                 onClick={() => setSidebarOpen(false)}
+                aria-label="Close navigation"
                 className="lg:hidden p-1 rounded-md hover:bg-muted"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -98,22 +109,31 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
           {/* Navigation */}
           <nav className="flex-1 p-4">
             <ul className="space-y-2">
-              {sidebarItems.map((item) => {
+              {sidebarItems.map(item => {
                 const Icon = item.icon
                 const isActive = activeTab === item.id
-                
+
                 return (
                   <li key={item.id}>
                     <button
                       onClick={() => {
-                        setActiveTab(item.id as 'posts' | 'analytics' | 'messages' | 'media')
+                        window.history.replaceState(
+                          null,
+                          '',
+                          `/cms?tab=${item.id}`
+                        )
+                        setActiveTab(
+                          item.id as
+                            'posts' | 'analytics' | 'messages' | 'media'
+                        )
                         setSidebarOpen(false)
                       }}
                       className={`
                         w-full flex items-center px-3 py-2 rounded-lg text-left transition-colors
-                        ${isActive
-                          ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300' 
-                          : 'text-muted-foreground hover:text-foreground hover:bg-muted'
+                        ${
+                          isActive
+                            ? 'bg-branding-100 text-branding-700 dark:bg-branding-900 dark:text-branding-300'
+                            : 'text-muted-foreground hover:text-foreground hover:bg-muted'
                         }
                       `}
                     >
@@ -136,9 +156,11 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
                 </span>
                 <ThemeToggle />
               </div>
-              
+
               <button
-                onClick={() => window.open('/', '_blank')}
+                onClick={() =>
+                  window.open('/', '_blank', 'noopener,noreferrer')
+                }
                 className="w-full flex items-center px-3 py-2 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors"
               >
                 <Home className="w-5 h-5 mr-3" />
@@ -161,15 +183,20 @@ function CMSSidebar({ activeTab, setActiveTab, onSignOut, sidebarOpen, setSideba
 
 // Main CMS Dashboard Component
 export default function CMSPage() {
-  const [user, setUser] = useState<any>(null)
+  const [user, setUser] = useState<User | null>(null)
   const [posts, setPosts] = useState<Post[]>([])
 
   const [loading, setLoading] = useState(true)
+  const [saving, setSaving] = useState(false)
+  const [notice, setNotice] = useState('')
+  const [loadError, setLoadError] = useState('')
   const [showEditor, setShowEditor] = useState(false)
   const [editingPost, setEditingPost] = useState<Post | null>(null)
-  const [activeTab, setActiveTab] = useState<'posts' | 'analytics' | 'messages' | 'media'>('posts')
+  const [activeTab, setActiveTab] = useState<
+    'posts' | 'analytics' | 'messages' | 'media'
+  >('posts')
   const [sidebarOpen, setSidebarOpen] = useState(false)
-  
+
   const router = useRouter()
   const pathname = usePathname()
   const supabase = createClient()
@@ -179,8 +206,13 @@ export default function CMSPage() {
     if (typeof window !== 'undefined') {
       const searchParams = new URLSearchParams(window.location.search)
       const tab = searchParams.get('tab')
-      if (tab === 'messages' || tab === 'analytics' || tab === 'posts') {
-        setActiveTab(tab as 'posts' | 'analytics' | 'messages')
+      if (
+        tab === 'messages' ||
+        tab === 'analytics' ||
+        tab === 'posts' ||
+        tab === 'media'
+      ) {
+        setActiveTab(tab)
       }
     }
   }, [pathname])
@@ -193,11 +225,10 @@ export default function CMSPage() {
   const [isPublished, setIsPublished] = useState(false)
 
   const checkUser = async () => {
-    const { data: { user } } = await supabase.auth.getUser()
-    
+    const {
+      data: { user },
+    } = await supabase.auth.getUser()
 
-
-    
     if (user?.app_metadata?.role !== 'admin') {
       router.push('/login')
       return false
@@ -209,134 +240,81 @@ export default function CMSPage() {
 
   const fetchPosts = async () => {
     try {
+      setLoadError('')
       const response = await fetch('/api/posts')
       if (response.ok) {
         const data = await response.json()
         setPosts(data as Post[])
       } else {
-        console.error('Failed to fetch posts:', response.status)
+        setLoadError('Could not load posts. Please retry.')
       }
     } catch (error) {
-      console.error('Error fetching posts:', error)
+      setLoadError('Could not load posts. Please retry.')
     }
   }
 
   useEffect(() => {
-    const initDashboard = async () => {
+    const init = async () => {
       try {
-        const isAuthenticated = await checkUser()
-        if (isAuthenticated) {
-          await fetchPosts()
-          setLoading(false)
-        }
-        // If not authenticated, keep loading state to prevent flash
-      } catch (error) {
-        console.error('Dashboard error:', error)
+        if (await checkUser()) await fetchPosts()
+      } catch {
+        setLoadError('Could not load your workspace. Please try again.')
+      } finally {
         setLoading(false)
       }
     }
-    
-    initDashboard()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    void init()
   }, [])
-
-  useEffect(() => {
-    const initDashboard = async () => {
-      try {
-        const isAuthenticated = await checkUser()
-        if (isAuthenticated) {
-          await fetchPosts()
-          setLoading(false)
-        }
-        // If not authenticated, keep loading state to prevent flash
-      } catch (error) {
-        console.error('Dashboard error:', error)
-        setLoading(false)
-      }
-    }
-    
-    initDashboard()
-  }, [])
-
-
 
   const handleSignOut = async () => {
-
-    await supabase.auth.signOut()
-    router.push('/login')
+    const { error } = await supabase.auth.signOut()
+    if (error) {
+      setNotice('Sign out failed. Please try again.')
+      return
+    }
+    router.replace('/login')
+    router.refresh()
   }
 
   const handleSavePost = async () => {
-    // Validation - ensure required fields are not empty
-    if (!title.trim()) {
-      alert('Title is required')
+    if (saving) return
+    if (!title.trim() || !summary.trim() || !content.trim()) {
+      setNotice('Title, excerpt and content are required.')
       return
     }
-    
-    if (!summary.trim()) {
-      alert('Excerpt is required')
-      return
-    }
-    
-    if (!content.trim()) {
-      alert('Content is required')
-      return
-    }
-
-    // Generate slug from title
-    const slug = title.toLowerCase()
-      .replace(/[^a-z0-9]+/g, '-')
-      .replace(/(^-|-$)/g, '')
-
-    // Map to posts table structure
-    const postData = {
-      title: title.trim(),
-      excerpt: summary.trim(),
-      body_mdx: content.trim(),  // posts table uses 'body_mdx'
-      tags: tags.split(',').map(tag => tag.trim()).filter(tag => tag),
-      published_at: isPublished ? new Date().toISOString() : null,  // posts table uses 'published_at'
-      slug: slug,
-    }
-
+    setSaving(true)
     try {
-      if (editingPost) {
-        // For updates, include the ID in the data
-        const updateData = { ...postData, id: editingPost.id }
-        const response = await fetch('/api/posts', {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updateData)
-        })
-        
-        if (response.ok) {
-          fetchPosts()
-          resetEditor()
-          alert('Post updated successfully!')
-        } else {
-          const errorData = await response.json()
-          console.error('Error updating post:', errorData)
-          alert('Error updating post: ' + JSON.stringify(errorData, null, 2))
-        }
-      } else {
-        const response = await fetch('/api/posts', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(postData)
-        })
-        
-        if (response.ok) {
-          fetchPosts()
-          resetEditor()
-          alert('Post created successfully!')
-        } else {
-          const errorData = await response.json()
-          console.error('Error creating post:', errorData)
-          alert('Error creating post: ' + JSON.stringify(errorData, null, 2))
-        }
+      const response = await fetch('/api/posts', {
+        method: editingPost ? 'PUT' : 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          ...(editingPost ? { id: editingPost.id } : {}),
+          title: title.trim(),
+          excerpt: summary.trim(),
+          body_mdx: content.trim(),
+          tags: tags
+            .split(',')
+            .map(tag => tag.trim())
+            .filter(Boolean),
+          published_at: isPublished
+            ? editingPost?.published_at || new Date().toISOString()
+            : null,
+        }),
+      })
+      if (!response.ok) {
+        const result = await response.json()
+        throw new Error(result.error || 'Could not save your post.')
       }
-    } catch (err) {
-      console.error('Unexpected error:', err)
-      alert('An unexpected error occurred')
+      resetEditor()
+      setNotice('Post saved.')
+      await fetchPosts()
+    } catch (error) {
+      // Keep the editor and all unsaved content open on failure.
+      alert(
+        error instanceof Error ? error.message : 'Could not save your post.'
+      )
+    } finally {
+      setSaving(false)
     }
   }
 
@@ -346,7 +324,9 @@ export default function CMSPage() {
         .from('posts')
         .delete()
         .eq('id', id)
-      
+        .select('id')
+        .single()
+
       if (error) {
         console.error('Error deleting post:', error)
         alert('Error deleting post: ' + error.message)
@@ -357,13 +337,14 @@ export default function CMSPage() {
     }
   }
 
-  const handleEditPost = (post: any) => {  // Use any for now since structure differs
+  const handleEditPost = (post: Post) => {
+    // Use any for now since structure differs
     setEditingPost(post)
     setTitle(post.title)
     setSummary(post.excerpt || '')
-    setContent(post.body_mdx || '')  // posts table uses 'body_mdx'
+    setContent(post.body_mdx || '') // posts table uses 'body_mdx'
     setTags(post.tags?.join(', ') || '')
-    setIsPublished(!!post.published_at)  // posts table uses 'published_at'
+    setIsPublished(!!post.published_at) // posts table uses 'published_at'
     setShowEditor(true)
   }
 
@@ -389,7 +370,7 @@ export default function CMSPage() {
   }
 
   return (
-    <div className="flex h-screen bg-background">
+    <div className="admin-shell flex min-h-dvh bg-background">
       <CMSSidebar
         activeTab={activeTab}
         setActiveTab={setActiveTab}
@@ -400,69 +381,98 @@ export default function CMSPage() {
       />
 
       {/* Main Content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
-        {/* Top Bar - ULTRA COMPACT */}
-        <header className="bg-card border-b border-border py-0.5 px-1 flex-shrink-0 h-6">
+      <div className="flex-1 min-w-0 flex flex-col">
+        {/* Workspace navigation */}
+        <header className="studio-topbar bg-card border-b border-border">
           <div className="flex items-center h-full">
             <button
+              aria-label="Open navigation"
+              aria-expanded={sidebarOpen}
               onClick={() => setSidebarOpen(true)}
               className="lg:hidden p-0.5 rounded-md hover:bg-muted mr-1"
             >
-              <Menu className="w-3 h-3" />
+              <Menu className="w-4 h-4" />
             </button>
-            <h1 className="text-xs font-bold text-foreground capitalize">
+            <h1 className="text-sm font-medium text-foreground capitalize">
               {activeTab}
             </h1>
           </div>
         </header>
 
-        {/* Content Area - FULL HEIGHT, NO PADDING */}
-        <main className="flex-1 overflow-auto">
+        {/* Workspace content */}
+        <section className="studio-content flex-1 min-w-0">
+          {notice && (
+            <p role="status" className="studio-notice">
+              {notice}
+            </p>
+          )}
+          {loadError && (
+            <div role="alert" className="studio-notice">
+              {loadError} <button onClick={fetchPosts}>Retry</button>
+            </div>
+          )}
           <div className="h-full">
             {activeTab === 'posts' && (
-              <div className="p-1 h-full">
+              <div className="space-y-6">
                 {/* Posts Header */}
-                <div className="flex items-center justify-between mb-1">
+                <div className="flex flex-wrap gap-4 items-center justify-between mb-6">
                   <div>
-                    <h2 className="text-xs font-semibold text-foreground">Blog Posts</h2>
-                    <p className="text-muted-foreground text-xs">Manage content</p>
+                    <h2 className="studio-heading">Your stories</h2>
+                    <p className="text-muted-foreground mt-2">
+                      Write, refine and share what you are building.
+                    </p>
                   </div>
                   <button
                     onClick={() => setShowEditor(true)}
-                    className="flex items-center px-1.5 py-0.5 bg-branding-600 text-white rounded text-xs"
+                    className="studio-primary"
                   >
-                    <Plus className="w-3 h-3 mr-0.5" />
-                    New
+                    <Plus className="w-4 h-4 mr-0.5" />
+                    New post
                   </button>
                 </div>
 
                 {/* Posts Grid */}
-                <div className="grid gap-1">
-                  {posts.map((post) => (
-                    <div key={post.id} className="bg-card border border-border rounded p-1.5">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <h3 className="font-semibold text-foreground text-xs mb-0.5">{post.title}</h3>
-                          <p className="text-muted-foreground text-xs mb-0.5 line-clamp-1">{post.excerpt}</p>
+                <div className="grid gap-4">
+                  {posts.map(post => (
+                    <div
+                      key={post.id}
+                      className="studio-post bg-card border border-border rounded-2xl p-5 sm:p-6"
+                    >
+                      <div className="flex flex-wrap gap-4 items-start justify-between">
+                        <div className="flex-1 min-w-0">
+                          <h3 className="font-semibold text-foreground text-lg mb-2 break-words">
+                            {post.title}
+                          </h3>
+                          <p className="text-muted-foreground text-sm mb-4 line-clamp-2 break-words">
+                            {post.excerpt}
+                          </p>
                           <div className="flex items-center space-x-1 text-xs text-muted-foreground">
                             <span className="px-1 py-0.5 rounded-full text-xs bg-muted text-foreground">
-                              {post.published_at ? 'Published' : 'Draft'}
+                              {post.published_at
+                                ? new Date(post.published_at) > new Date()
+                                  ? 'Scheduled'
+                                  : 'Published'
+                                : 'Draft'}
                             </span>
-                            <span className="text-xs">{new Date(post.created_at).toLocaleDateString()}</span>
+                            <span className="text-xs">
+                              {new Date(post.created_at).toLocaleDateString()}
+                            </span>
                           </div>
                         </div>
                         <div className="flex items-center">
                           <button
+                            aria-label={`Edit ${post.title}`}
                             onClick={() => handleEditPost(post)}
                             className="p-0.5 text-muted-foreground hover:text-foreground rounded"
                           >
-                            <Edit3 className="w-3 h-3" />
+                            <Edit3 className="w-4 h-4" />
                           </button>
                           <button
+                            aria-label={`Delete ${post.title}`}
                             onClick={() => handleDeletePost(post.id)}
                             className="p-0.5 text-muted-foreground hover:text-red-600 rounded"
                           >
-                            <Trash2 className="w-3 h-3" />
+                            <Trash2 className="w-4 h-4" />
                           </button>
                         </div>
                       </div>
@@ -470,10 +480,14 @@ export default function CMSPage() {
                   ))}
 
                   {posts.length === 0 && (
-                    <div className="text-center py-4">
+                    <div className="studio-empty text-center py-16">
                       <FileText className="w-4 h-4 text-muted-foreground mx-auto mb-1" />
-                      <h3 className="text-xs font-medium text-foreground">No posts yet</h3>
-                      <p className="text-muted-foreground text-xs">Create your first post</p>
+                      <h3 className="text-lg font-medium text-foreground">
+                        No posts yet
+                      </h3>
+                      <p className="text-muted-foreground text-xs">
+                        Create your first post
+                      </p>
                     </div>
                   )}
                 </div>
@@ -481,29 +495,30 @@ export default function CMSPage() {
             )}
 
             {activeTab === 'analytics' && (
-              <div className="p-4 h-full overflow-auto">
+              <div className="min-w-0">
                 <ClarityAnalyticsDashboard />
               </div>
             )}
 
             {activeTab === 'media' && (
-              <div className="h-full overflow-auto">
+              <div className="min-w-0">
                 <MediaClient />
               </div>
             )}
 
             {activeTab === 'messages' && (
-              <div className="p-4 h-full overflow-auto">
+              <div className="min-w-0">
                 <MessagesClient />
               </div>
             )}
           </div>
-        </main>
+        </section>
       </div>
 
       {/* Post Editor Modal */}
       {showEditor && (
         <MarkdownEditor
+          saving={saving}
           value={content}
           onChange={setContent}
           onSave={handleSavePost}

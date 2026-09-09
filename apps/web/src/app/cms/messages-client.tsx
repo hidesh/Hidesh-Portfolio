@@ -16,31 +16,30 @@ interface ContactMessage {
 export function MessagesClient() {
   const [messages, setMessages] = useState<ContactMessage[]>([])
   const [loading, setLoading] = useState(true)
+  const [loadError, setLoadError] = useState('')
   const [searchQuery, setSearchQuery] = useState('')
-  const [filterHandled, setFilterHandled] = useState<'all' | 'handled' | 'unhandled'>('all')
-  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(null)
+  const [filterHandled, setFilterHandled] = useState<
+    'all' | 'handled' | 'unhandled'
+  >('all')
+  const [selectedMessage, setSelectedMessage] = useState<ContactMessage | null>(
+    null
+  )
 
   const supabase = createClient()
 
   const fetchMessages = async () => {
     setLoading(true)
+    setLoadError('')
     let query = supabase
       .from('contacts')
       .select('*')
       .order('created_at', { ascending: false })
 
-    if (filterHandled === 'handled') {
-      query = query.eq('handled', true)
-    } else if (filterHandled === 'unhandled') {
-      query = query.eq('handled', false)
-    }
-
     const { data, error } = await query
 
     if (error) {
-      console.error('Error fetching messages:', error)
+      setLoadError('Could not load messages. Please retry.')
     } else {
-      console.log('Fetched messages:', data)
       setMessages(data || [])
     }
     setLoading(false)
@@ -48,19 +47,25 @@ export function MessagesClient() {
 
   useEffect(() => {
     fetchMessages()
-  }, [filterHandled])
+  }, [])
 
   const toggleHandled = async (id: string, currentHandled: boolean) => {
     const { error } = await supabase
       .from('contacts')
       .update({ handled: !currentHandled })
       .eq('id', id)
+      .select('id')
+      .single()
 
     if (error) {
       console.error('Error updating handled status:', error)
       alert('Failed to update status')
     } else {
-      setMessages(messages.map(msg => msg.id === id ? { ...msg, handled: !currentHandled } : msg))
+      setMessages(
+        messages.map(msg =>
+          msg.id === id ? { ...msg, handled: !currentHandled } : msg
+        )
+      )
       if (selectedMessage?.id === id) {
         setSelectedMessage({ ...selectedMessage, handled: !currentHandled })
       }
@@ -74,6 +79,8 @@ export function MessagesClient() {
       .from('contacts')
       .delete()
       .eq('id', id)
+      .select('id')
+      .single()
 
     if (error) {
       console.error('Error deleting message:', error)
@@ -86,11 +93,18 @@ export function MessagesClient() {
     }
   }
 
-  const filteredMessages = messages.filter(msg =>
-    msg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    msg.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    msg.message.toLowerCase().includes(searchQuery.toLowerCase())
-  )
+  const filteredMessages = messages
+    .filter(
+      msg =>
+        filterHandled === 'all' ||
+        (filterHandled === 'handled' ? msg.handled : !msg.handled)
+    )
+    .filter(
+      msg =>
+        msg.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        msg.email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        msg.message.toLowerCase().includes(searchQuery.toLowerCase())
+    )
 
   const statusCounts = {
     all: messages.length,
@@ -100,10 +114,17 @@ export function MessagesClient() {
 
   return (
     <div className="space-y-6">
+      {loadError && (
+        <div role="alert" className="studio-notice">
+          {loadError} <button onClick={fetchMessages}>Retry</button>
+        </div>
+      )}
       {/* Header */}
       <div>
         <h1 className="text-3xl font-bold text-foreground">Contact Messages</h1>
-        <p className="text-muted-foreground mt-2">Manage and respond to contact form submissions</p>
+        <p className="text-muted-foreground mt-2">
+          Manage and respond to contact form submissions
+        </p>
       </div>
 
       {/* Filters */}
@@ -112,16 +133,17 @@ export function MessagesClient() {
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
           <input
+            aria-label="Search messages"
             type="text"
             placeholder="Search by name, email, or message..."
             value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
+            onChange={e => setSearchQuery(e.target.value)}
             className="w-full pl-10 pr-4 py-2 bg-muted/50 border border-branding-200 dark:border-branding-800 rounded-lg focus:ring-2 focus:ring-branding-500 focus:border-branding-500 transition-all outline-none"
           />
         </div>
 
         {/* Status Filter */}
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
           <button
             onClick={() => setFilterHandled('all')}
             className={`px-4 py-2 rounded-lg text-sm font-medium transition-all ${
@@ -168,73 +190,105 @@ export function MessagesClient() {
       ) : (
         <div className="grid gap-4">
           {filteredMessages.map(message => (
-              <div
-                key={message.id}
-                className={`p-4 sm:p-6 bg-card border rounded-lg transition-all cursor-pointer hover:shadow-lg ${
-                  selectedMessage?.id === message.id
-                    ? 'border-branding-500 ring-2 ring-branding-500/20'
-                    : 'border-branding-200 dark:border-branding-800'
-                }`}
-                onClick={() => setSelectedMessage(message)}
-              >
-                <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
-                  <div className="flex-1 min-w-0 w-full">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
-                      <h3 className="font-semibold text-foreground truncate max-w-full">{message.name}</h3>
-                      <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                        message.handled 
-                          ? 'text-green-600 bg-green-50 dark:bg-green-950' 
+            <div
+              key={message.id}
+              className={`p-4 sm:p-6 bg-card border rounded-lg transition-all cursor-pointer hover:shadow-lg ${
+                selectedMessage?.id === message.id
+                  ? 'border-branding-500 ring-2 ring-branding-500/20'
+                  : 'border-branding-200 dark:border-branding-800'
+              }`}
+              onClick={() =>
+                setSelectedMessage(
+                  selectedMessage?.id === message.id ? null : message
+                )
+              }
+              role="button"
+              tabIndex={0}
+              aria-expanded={selectedMessage?.id === message.id}
+              onKeyDown={e => {
+                if (
+                  e.target === e.currentTarget &&
+                  (e.key === 'Enter' || e.key === ' ')
+                ) {
+                  e.preventDefault()
+                  setSelectedMessage(
+                    selectedMessage?.id === message.id ? null : message
+                  )
+                }
+              }}
+            >
+              <div className="flex flex-col sm:flex-row items-start justify-between gap-3 sm:gap-4">
+                <div className="flex-1 min-w-0 w-full">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
+                    <h3 className="font-semibold text-foreground truncate max-w-full">
+                      {message.name}
+                    </h3>
+                    <span
+                      className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        message.handled
+                          ? 'text-green-600 bg-green-50 dark:bg-green-950'
                           : 'text-blue-600 bg-blue-50 dark:bg-blue-950'
-                      }`}>
-                        {message.handled ? <CheckCircle className="h-3.5 w-3.5" /> : <Clock className="h-3.5 w-3.5" />}
-                        {message.handled ? 'Handled' : 'Unhandled'}
-                      </span>
-                    </div>
-                    <p className="text-sm text-muted-foreground mb-2 truncate">{message.email}</p>
-                    <p className="text-sm text-muted-foreground line-clamp-3 break-words">{message.message}</p>
-                    <p className="text-xs text-muted-foreground mt-2">
-                      {new Date(message.created_at).toLocaleString('da-DK', {
-                        dateStyle: 'medium',
-                        timeStyle: 'short'
-                      })}
-                    </p>
-                  </div>
-
-                  <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        toggleHandled(message.id, message.handled)
-                      }}
-                      className="flex-1 sm:flex-none px-3 py-1.5 bg-muted/50 border border-branding-200 dark:border-branding-800 rounded-lg text-xs sm:text-sm hover:bg-muted transition-colors whitespace-nowrap"
+                      }`}
                     >
-                      {message.handled ? 'Unhandled' : 'Handled'}
-                    </button>
-
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation()
-                        deleteMessage(message.id)
-                      }}
-                      className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors flex-shrink-0"
-                      title="Delete message"
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </button>
+                      {message.handled ? (
+                        <CheckCircle className="h-3.5 w-3.5" />
+                      ) : (
+                        <Clock className="h-3.5 w-3.5" />
+                      )}
+                      {message.handled ? 'Handled' : 'Unhandled'}
+                    </span>
                   </div>
+                  <p className="text-sm text-muted-foreground mb-2 truncate">
+                    {message.email}
+                  </p>
+                  <p className="text-sm text-muted-foreground line-clamp-3 break-words">
+                    {message.message}
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    {new Date(message.created_at).toLocaleString('da-DK', {
+                      dateStyle: 'medium',
+                      timeStyle: 'short',
+                    })}
+                  </p>
                 </div>
 
-                {/* Expanded View */}
-                {selectedMessage?.id === message.id && (
-                  <div className="mt-4 pt-4 border-t border-branding-200 dark:border-branding-800">
-                    <h4 className="text-sm font-semibold text-foreground mb-2">Full Message:</h4>
-                    <p className="text-sm text-foreground whitespace-pre-wrap bg-muted/50 p-4 rounded-lg">
-                      {message.message}
-                    </p>
-                  </div>
-                )}
+                <div className="flex flex-row sm:flex-col gap-2 w-full sm:w-auto">
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      toggleHandled(message.id, message.handled)
+                    }}
+                    className="flex-1 sm:flex-none px-3 py-1.5 bg-muted/50 border border-branding-200 dark:border-branding-800 rounded-lg text-xs sm:text-sm hover:bg-muted transition-colors whitespace-nowrap"
+                  >
+                    {message.handled ? 'Unhandled' : 'Handled'}
+                  </button>
+
+                  <button
+                    onClick={e => {
+                      e.stopPropagation()
+                      deleteMessage(message.id)
+                    }}
+                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-950 rounded-lg transition-colors flex-shrink-0"
+                    title="Delete message"
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </button>
+                </div>
               </div>
-            ))}
+
+              {/* Expanded View */}
+              {selectedMessage?.id === message.id && (
+                <div className="mt-4 pt-4 border-t border-branding-200 dark:border-branding-800">
+                  <h4 className="text-sm font-semibold text-foreground mb-2">
+                    Full Message:
+                  </h4>
+                  <p className="text-sm text-foreground whitespace-pre-wrap break-words bg-muted/50 p-4 rounded-lg">
+                    {message.message}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
         </div>
       )}
     </div>

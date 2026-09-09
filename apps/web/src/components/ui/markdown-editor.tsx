@@ -1,7 +1,17 @@
 'use client'
 
+import { useDialogFocus } from '@/lib/use-dialog-focus'
 import { useState, useRef } from 'react'
-import { Eye, Code, X, Save, HelpCircle, ImagePlus, Loader2, Maximize2 } from 'lucide-react'
+import {
+  Eye,
+  Code,
+  X,
+  Save,
+  HelpCircle,
+  ImagePlus,
+  Loader2,
+  Maximize2,
+} from 'lucide-react'
 import { MarkdownViewer } from './markdown-viewer'
 
 interface MarkdownEditorProps {
@@ -17,6 +27,7 @@ interface MarkdownEditorProps {
   onTagsChange?: (value: string) => void
   isPublished?: boolean
   onPublishedChange?: (value: boolean) => void
+  saving?: boolean
   editMode?: boolean
 }
 
@@ -40,21 +51,30 @@ export function MarkdownEditor({
   onTagsChange,
   isPublished = false,
   onPublishedChange,
-  editMode = false
+  saving = false,
+  editMode = false,
 }: MarkdownEditorProps) {
   const [mode, setMode] = useState<'write' | 'preview'>('write')
   const [showHelp, setShowHelp] = useState(false)
   const [uploading, setUploading] = useState(false)
   const [imageResize, setImageResize] = useState<ImageResizeState | null>(null)
+  const dialogRef = useDialogFocus(true, () => {
+    if (!saving && !uploading) onCancel?.()
+  })
   const fileInputRef = useRef<HTMLInputElement>(null)
   const textareaRef = useRef<HTMLTextAreaElement>(null)
 
-  const handleImageUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleImageUpload = async (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     const file = event.target.files?.[0]
     if (!file) return
 
     // Ask for alt text description
-    const altText = prompt('Enter image description (alt text for accessibility):', file.name.replace(/\.[^/.]+$/, ''))
+    const altText = prompt(
+      'Enter image description (alt text for accessibility):',
+      file.name.replace(/\.[^/.]+$/, '')
+    )
     if (altText === null) {
       // User cancelled
       if (fileInputRef.current) {
@@ -81,11 +101,10 @@ export function MarkdownEditor({
       }
 
       const data = await response.json()
-      
+
       // Insert HTML image with default 600px width for easy resizing
-      const imageHtml = `\n\n<img src="${data.url}" alt="${altText || file.name}" width="600" />\n\n`
+      const imageHtml = `\n\n<img src="${data.url}" alt="${(altText || file.name).replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;')}" width="600" />\n\n`
       onChange(value + imageHtml)
-      
     } catch (error) {
       console.error('Upload error:', error)
       alert('Failed to upload image')
@@ -97,17 +116,21 @@ export function MarkdownEditor({
     }
   }
 
-  const handleTextareaClick = (event: React.MouseEvent<HTMLTextAreaElement>) => {
+  const handleTextareaClick = (
+    event: React.MouseEvent<HTMLTextAreaElement>
+  ) => {
     const textarea = event.currentTarget
     const cursorPos = textarea.selectionStart
     const text = value
 
     // Check if clicked on an image tag
-    const imgRegex = /<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*(?:width="(\d+)")?[^>]*\/?>/g
+    const imgRegex =
+      /<img[^>]+src="([^"]+)"[^>]*alt="([^"]*)"[^>]*(?:width="(\d+)")?[^>]*\/?>/g
     let match
-    
+
     while ((match = imgRegex.exec(text)) !== null) {
-      const [fullMatch, url, alt, width] = match
+      const [fullMatch, url, alt] = match
+      const width = fullMatch.match(/width="(\d+)"/)?.[1]
       const start = match.index
       const end = start + fullMatch.length
 
@@ -116,7 +139,7 @@ export function MarkdownEditor({
           url,
           alt,
           currentWidth: width ? parseInt(width) : 600,
-          position: { start, end }
+          position: { start, end },
         })
         break
       }
@@ -130,9 +153,16 @@ export function MarkdownEditor({
     const before = value.substring(0, position.start)
     const after = value.substring(position.end)
     const newImage = `<img src="${url}" alt="${alt}" width="${newWidth}" />`
-    
+
     onChange(before + newImage + after)
-    setImageResize({ ...imageResize, currentWidth: newWidth })
+    setImageResize({
+      ...imageResize,
+      currentWidth: newWidth,
+      position: {
+        start: position.start,
+        end: position.start + newImage.length,
+      },
+    })
   }
 
   const markdownHelp = [
@@ -151,8 +181,14 @@ export function MarkdownEditor({
   ]
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-      <div className="bg-card rounded-lg w-full max-w-6xl h-[90vh] flex flex-col">
+    <div className="studio-editor-overlay fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-2 sm:p-4">
+      <div
+        ref={dialogRef}
+        role="dialog"
+        aria-modal="true"
+        aria-label={editMode ? 'Edit Post' : 'New Post'}
+        className="studio-editor bg-card rounded-lg w-full max-w-6xl flex flex-col overflow-y-auto"
+      >
         {/* Header */}
         <div className="flex items-center justify-between p-4 border-b border-border bg-muted/50">
           <h2 className="text-lg font-semibold text-foreground">
@@ -167,7 +203,9 @@ export function MarkdownEditor({
               <HelpCircle className="w-4 h-4" />
             </button>
             <button
+              disabled={saving || uploading}
               onClick={onCancel}
+              aria-label="Close editor"
               className="text-muted-foreground hover:text-foreground"
             >
               <X className="w-5 h-5" />
@@ -191,50 +229,61 @@ export function MarkdownEditor({
             </div>
           </div>
         )}
-        
+
         {/* Meta Fields */}
         <div className="p-4 space-y-3 border-b border-border bg-background">
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Title *</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Title *
+            </label>
             <input
+              aria-label="Title"
               type="text"
               value={title}
-              onChange={(e) => onTitleChange?.(e.target.value)}
+              onChange={e => onTitleChange?.(e.target.value)}
               className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
               placeholder="Enter an engaging post title..."
             />
           </div>
-          
+
           <div>
-            <label className="block text-sm font-medium text-foreground mb-1.5">Excerpt *</label>
+            <label className="block text-sm font-medium text-foreground mb-1.5">
+              Excerpt *
+            </label>
             <textarea
+              aria-label="Excerpt"
               value={excerpt}
-              onChange={(e) => onExcerptChange?.(e.target.value)}
+              onChange={e => onExcerptChange?.(e.target.value)}
               rows={2}
               className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent resize-none"
               placeholder="Brief description that appears in blog listings..."
             />
           </div>
-          
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
-              <label className="block text-sm font-medium text-foreground mb-1.5">Tags</label>
+              <label className="block text-sm font-medium text-foreground mb-1.5">
+                Tags
+              </label>
               <input
                 type="text"
+                aria-label="Tags"
                 value={tags}
-                onChange={(e) => onTagsChange?.(e.target.value)}
+                onChange={e => onTagsChange?.(e.target.value)}
                 className="w-full px-3 py-2 border border-border rounded-md bg-background text-foreground focus:ring-2 focus:ring-primary focus:border-transparent"
                 placeholder="react, typescript, nextjs"
               />
-              <p className="text-xs text-muted-foreground mt-1">Comma separated</p>
+              <p className="text-xs text-muted-foreground mt-1">
+                Comma separated
+              </p>
             </div>
-            
+
             <div className="flex items-end">
               <label className="flex items-center gap-2 cursor-pointer">
                 <input
                   type="checkbox"
                   checked={isPublished}
-                  onChange={(e) => onPublishedChange?.(e.target.checked)}
+                  onChange={e => onPublishedChange?.(e.target.checked)}
                   className="h-4 w-4 rounded border-border text-primary focus:ring-primary"
                 />
                 <span className="text-sm text-foreground font-medium">
@@ -247,7 +296,7 @@ export function MarkdownEditor({
 
         {/* Editor Tabs */}
         <div className="border-b border-border bg-muted/30">
-          <div className="flex items-center gap-2 px-2 py-1">
+          <div className="flex flex-wrap items-center gap-2 px-2 py-1">
             <button
               onClick={() => setMode('write')}
               className={`flex items-center gap-2 px-3 py-2 border-b-2 transition-colors ${
@@ -270,7 +319,7 @@ export function MarkdownEditor({
               <Eye className="w-4 h-4" />
               Preview
             </button>
-            
+
             {/* Image Upload Button - Inline with tabs */}
             {mode === 'write' && (
               <>
@@ -306,13 +355,14 @@ export function MarkdownEditor({
         </div>
 
         {/* Editor Content */}
-        <div className="flex-1 overflow-auto">
+        <div className="flex-1 min-h-[280px] overflow-auto">
           {mode === 'write' ? (
             <div className="h-full relative">
               <textarea
+                aria-label="Post content"
                 ref={textareaRef}
                 value={value}
-                onChange={(e) => onChange(e.target.value)}
+                onChange={e => onChange(e.target.value)}
                 onClick={handleTextareaClick}
                 className="w-full h-full p-4 bg-background text-foreground font-mono text-sm resize-none focus:outline-none"
                 placeholder="# Start writing your post...
@@ -328,10 +378,10 @@ console.log('Hello, World!');
 
 Click on any image to resize it!"
               />
-              
+
               {/* Image Resize Panel */}
               {imageResize && (
-                <div className="absolute top-4 right-4 bg-card border border-border rounded-lg shadow-lg p-4 w-80">
+                <div className="absolute top-4 right-4 bg-card border border-border rounded-lg shadow-lg p-4 w-64 max-w-[calc(100%-2rem)]">
                   <div className="flex items-center justify-between mb-3">
                     <h3 className="font-semibold text-sm flex items-center gap-2">
                       <Maximize2 className="w-4 h-4" />
@@ -344,22 +394,25 @@ Click on any image to resize it!"
                       <X className="w-4 h-4" />
                     </button>
                   </div>
-                  
+
                   {/* Image Preview */}
                   <div className="mb-3 bg-muted/30 rounded-md p-2 border border-border">
-                    <img 
-                      src={imageResize.url} 
+                    <img
+                      src={imageResize.url}
                       alt={imageResize.alt}
-                      style={{ width: `${imageResize.currentWidth}px`, maxWidth: '100%' }}
+                      style={{
+                        width: `${imageResize.currentWidth}px`,
+                        maxWidth: '100%',
+                      }}
                       className="mx-auto"
                     />
                   </div>
-                  
+
                   {/* Size Info */}
                   <div className="text-xs text-muted-foreground mb-3 text-center">
                     Current width: {imageResize.currentWidth}px
                   </div>
-                  
+
                   {/* Size Slider */}
                   <div className="mb-3">
                     <input
@@ -368,7 +421,7 @@ Click on any image to resize it!"
                       max="1200"
                       step="50"
                       value={imageResize.currentWidth}
-                      onChange={(e) => applyImageResize(parseInt(e.target.value))}
+                      onChange={e => applyImageResize(parseInt(e.target.value))}
                       className="w-full accent-primary"
                     />
                     <div className="flex justify-between text-xs text-muted-foreground mt-1">
@@ -376,7 +429,7 @@ Click on any image to resize it!"
                       <span>1200px</span>
                     </div>
                   </div>
-                  
+
                   {/* Preset Sizes */}
                   <div className="grid grid-cols-3 gap-2">
                     {[300, 600, 900].map(size => (
@@ -414,12 +467,14 @@ Click on any image to resize it!"
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between p-4 border-t border-border bg-muted/50">
+        <div className="flex flex-wrap gap-3 items-center justify-between p-4 border-t border-border bg-muted/50">
           <div className="text-sm text-muted-foreground">
-            {value.length} characters • {value.split(/\s+/).filter(Boolean).length} words
+            {value.length} characters •{' '}
+            {value.split(/\s+/).filter(Boolean).length} words
           </div>
           <div className="flex items-center gap-3">
             <button
+              disabled={saving || uploading}
               onClick={onCancel}
               className="px-4 py-2 text-foreground hover:bg-muted rounded-md transition-colors"
             >
@@ -427,11 +482,17 @@ Click on any image to resize it!"
             </button>
             <button
               onClick={onSave}
-              disabled={!title || !excerpt || !value}
+              disabled={
+                saving ||
+                uploading ||
+                !title.trim() ||
+                !excerpt.trim() ||
+                !value.trim()
+              }
               className="flex items-center gap-2 px-4 py-2 bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <Save className="w-4 h-4" />
-              {editMode ? 'Update Post' : 'Create Post'}
+              {saving ? 'Saving…' : editMode ? 'Update Post' : 'Create Post'}
             </button>
           </div>
         </div>

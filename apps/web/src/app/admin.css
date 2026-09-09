@@ -1,0 +1,213 @@
+.admin-shell {
+  font-family: var(--font-sans, Arial), sans-serif;
+  --background: 40 25% 96%;
+  --foreground: 155 18% 16%;
+  --card: 40 35% 99%;
+  --muted: 40 16% 91%;
+  --muted-foreground: 150 7% 40%;
+  --border: 40 15% 83%;
+  --primary: 155 20% 22%;
+  --primary-foreground: 40 25% 96%;
+  --branding-600: 20 52% 38%;
+  --branding-700: 20 52% 30%;
+  --branding-200: 30 20% 80%;
+  --branding-800: 20 22% 35%;
+  color: hsl(var(--foreground));
+  background: hsl(var(--background));
+}
+.dark .admin-shell {
+  --background: 155 17% 10%;
+  --foreground: 40 22% 92%;
+  --card: 155 15% 13%;
+  --muted: 155 12% 18%;
+  --muted-foreground: 40 10% 67%;
+  --border: 155 10% 25%;
+  --primary: 40 25% 88%;
+  --primary-foreground: 155 17% 10%;
+}
+.admin-shell button,
+.admin-shell input,
+.admin-shell select {
+  min-height: 44px;
+}
+.admin-shell button {
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+.admin-shell button:disabled {
+  opacity: 0.5;
+  cursor: wait;
+}
+.admin-shell :focus-visible {
+  outline: 2px solid #b56f48;
+  outline-offset: 3px;
+}
+.admin-shell input:not([type='checkbox']):not([type='range']),
+.admin-shell textarea {
+  font-size: 16px;
+  min-width: 0;
+}
+.admin-shell svg {
+  flex-shrink: 0;
+}
+.studio-caption {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.16em;
+  margin-top: 8px;
+  font-weight: 500;
+  color: hsl(var(--muted-foreground));
+}
+.studio-topbar {
+  padding: 16px 24px;
+  min-height: 70px;
+}
+.studio-content {
+  padding: clamp(16px, 4vw, 48px);
+  max-width: 1600px;
+  width: 100%;
+  margin: 0 auto;
+}
+.studio-heading {
+  font-size: clamp(28px, 4vw, 42px);
+  font-weight: 500;
+  letter-spacing: -0.045em;
+}
+.studio-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 12px 20px;
+  border-radius: 10px;
+  background: #a65c36;
+  color: white;
+  font-weight: 600;
+}
+.studio-primary:hover {
+  background: #884529;
+}
+.studio-post {
+  box-shadow: 0 3px 18px #12231b04;
+}
+.studio-post button {
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+.studio-notice {
+  padding: 14px 18px;
+  border: 1px solid hsl(var(--border));
+  border-radius: 10px;
+  margin-bottom: 20px;
+  overflow-wrap: anywhere;
+}
+.studio-empty {
+  border: 1px dashed hsl(var(--border));
+  border-radius: 16px;
+}
+.studio-login {
+  padding: 32px 20px;
+}
+.studio-login-grid {
+  display: grid;
+  grid-template-columns: 1.15fr 1fr;
+  width: min(100%, 1040px);
+  border: 1px solid hsl(var(--border));
+  border-radius: 24px;
+  overflow: hidden;
+  box-shadow: 0 25px 100px #10251a0b;
+}
+.studio-welcome {
+  position: relative;
+  overflow: hidden;
+  padding: 48px;
+  background: #213e32;
+  color: #f4eee1;
+  min-height: 640px;
+}
+.studio-brand {
+  font-size: 15px;
+  letter-spacing: -0.02em;
+}
+.studio-eyebrow {
+  margin-top: 110px;
+  letter-spacing: 0.16em;
+  font-size: 10px;
+  color: #d9b491;
+}
+.studio-welcome h1 {
+  position: relative;
+  z-index: 1;
+  font-size: clamp(40px, 5vw, 60px);
+  line-height: 1.08;
+  letter-spacing: -0.05em;
+  margin: 22px 0;
+  font-weight: 500;
+}
+.studio-welcome > p:last-of-type {
+  color: #c1cec4;
+  font-size: 15px;
+  line-height: 1.8;
+}
+.studio-orbit {
+  position: absolute;
+  width: 330px;
+  height: 330px;
+  bottom: -240px;
+  right: -20px;
+  border: 28px solid #ba7b55;
+  border-radius: 50%;
+  box-shadow:
+    0 0 0 16px #ba7b5520,
+    0 0 0 40px #ba7b5510;
+}
+.studio-login-card {
+  padding: clamp(24px, 4vw, 48px);
+  border: 0;
+  border-radius: 0;
+  background: hsl(var(--card));
+}
+.studio-editor {
+  max-height: 94dvh;
+  height: 900px;
+}
+.studio-editor > * {
+  flex-shrink: 0;
+}
+.studio-editor textarea[aria-label='Post content'] {
+  min-height: 280px;
+}
+@media (max-width: 700px) {
+  .studio-login-grid {
+    grid-template-columns: 1fr;
+    max-width: 460px;
+  }
+  .studio-welcome {
+    min-height: 0;
+    padding: 24px;
+  }
+  .studio-eyebrow {
+    margin-top: 26px;
+  }
+  .studio-welcome h1 {
+    font-size: 34px;
+    margin: 12px 0;
+  }
+  .studio-welcome > p:last-of-type {
+    display: none;
+  }
+  .studio-orbit {
+    width: 200px;
+    height: 200px;
+    bottom: -140px;
+  }
+  .studio-topbar {
+    padding: 12px 16px;
+  }
+  .studio-editor {
+    max-height: 96dvh;
+  }
+}

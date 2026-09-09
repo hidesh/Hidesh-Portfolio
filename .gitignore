@@ -15,10 +15,8 @@ out
 
 # Environment variables - CRITICAL SECURITY
 .env
-.env*.local
-.env.production
-.env.development
-.env.staging
+.env*
+!.env.example
 
 # Sensitive files
 *.key
@@ -76,3 +74,7 @@ temp
 *.temp
 .npm-cache/
 .pnpm-store/
+
+# Local one-time operator scripts; never shipped with the application
+scripts/grant-owner-admin.sql
+scripts/private/

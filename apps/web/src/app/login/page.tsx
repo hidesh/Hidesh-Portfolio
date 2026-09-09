@@ -2,9 +2,11 @@
 
 import { useState, useEffect } from 'react'
 import { createClient } from '@/lib/supabase/client'
-import { restoreAdminSession } from '@/lib/supabase/admin-session'
+import { verifyAdminSession } from '@/lib/supabase/admin-session'
 import { useRouter } from 'next/navigation'
 import Link from 'next/link'
+import '../admin.css'
+import { ThemeToggle } from '@/components/ui/theme-toggle'
 import { Eye, EyeOff, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
@@ -26,7 +28,7 @@ export default function LoginPage() {
         } = await supabase.auth.getUser()
 
         if (user) {
-          await restoreAdminSession(supabase)
+          await verifyAdminSession(supabase)
           const urlParams = new URLSearchParams(window.location.search)
           const requested = urlParams.get('redirectedFrom')
           const redirectTo =
@@ -48,7 +50,7 @@ export default function LoginPage() {
     }
 
     checkAuth()
-  }, [])
+  }, [router])
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -66,7 +68,7 @@ export default function LoginPage() {
         throw new Error(error.message)
       }
 
-      await restoreAdminSession(supabase)
+      await verifyAdminSession(supabase)
       // Get redirect URL from search params or default to /cms
       const urlParams = new URLSearchParams(window.location.search)
       const requested = urlParams.get('redirectedFrom')
@@ -99,26 +101,48 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-background flex items-center justify-center px-6">
-      <div className="w-full max-w-md">
-        <div className="bg-muted/50 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-8">
+    <div className="admin-shell studio-login min-h-dvh bg-background flex items-center justify-center px-6">
+      <div className="studio-login-grid">
+        <aside className="studio-welcome">
+          <Link href="/" className="studio-brand">
+            HK / Hidesh Kumar
+          </Link>
+          <p className="studio-eyebrow">THE WORK BEHIND THE WORK</p>
+          <h1>
+            A space for
+            <br />
+            your next idea.
+          </h1>
+          <p>
+            Stories, projects and conversations.
+            <br />
+            Your portfolio starts here.
+          </p>
+          <span className="studio-orbit" aria-hidden="true" />
+        </aside>
+        <div className="studio-login-card bg-muted/50 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-8">
           {/* Header */}
-          <div className="text-center mb-8">
+          <div className="mb-8">
+            <div className="flex justify-end">
+              <ThemeToggle />
+            </div>
             <div className="inline-flex items-center justify-center w-16 h-16 bg-gradient-to-br from-branding-500 to-branding-700 rounded-full mb-4">
               <Lock className="h-8 w-8 text-white" />
             </div>
             <h1 className="text-2xl font-bold text-foreground mb-2">
-              Admin Login
+              Welcome back
             </h1>
             <p className="text-muted-foreground">
-              Sign in to access the CMS dashboard
+              Sign in to your portfolio workspace.
             </p>
           </div>
 
           {/* Error Message */}
           {error && (
             <div className="bg-red-500/10 border border-red-500/20 rounded-lg p-4 mb-6">
-              <p className="text-red-600 text-sm">{error}</p>
+              <p role="alert" className="text-red-600 text-sm">
+                {error}
+              </p>
             </div>
           )}
 
@@ -136,6 +160,9 @@ export default function LoginPage() {
                 <Mail className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   id="email"
+                  autoComplete="username"
+                  autoCapitalize="none"
+                  spellCheck={false}
                   type="email"
                   value={email}
                   onChange={e => setEmail(e.target.value)}
@@ -158,6 +185,7 @@ export default function LoginPage() {
                 <Lock className="absolute left-3 top-1/2 transform -translate-y-1/2 h-5 w-5 text-muted-foreground" />
                 <input
                   id="password"
+                  autoComplete="current-password"
                   type={showPassword ? 'text' : 'password'}
                   value={password}
                   onChange={e => setPassword(e.target.value)}
@@ -167,6 +195,8 @@ export default function LoginPage() {
                 />
                 <button
                   type="button"
+                  aria-label={showPassword ? 'Hide password' : 'Show password'}
+                  aria-pressed={showPassword}
                   onClick={() => setShowPassword(!showPassword)}
                   className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
                 >
@@ -183,7 +213,7 @@ export default function LoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full bg-gradient-to-r from-branding-600 to-branding-800 hover:from-branding-500 hover:to-branding-700 text-white font-semibold py-3 px-6 rounded-lg transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="studio-primary w-full"
             >
               {loading ? 'Signing in...' : 'Sign In'}
             </button>

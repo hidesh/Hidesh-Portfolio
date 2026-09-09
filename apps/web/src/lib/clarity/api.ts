@@ -1,3 +1,5 @@
+import 'server-only'
+
 /**
  * Microsoft Clarity API Client
  * Server-side only - uses private API token

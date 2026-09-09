@@ -17,7 +17,7 @@ Forsiden har fået nyt layout, tydeligere projektpræsentationer, kortere tekst,
 Der er ikke adgang til din live-Supabase/Vercel-konfiguration i denne opgave. Følgende er derfor **ikke udført live**:
 
 1. Brug Node.js 22 eller 24 og pnpm 8.15.4. Kør `pnpm install --frozen-lockfile`.
-2. Log ind med ejerens eksisterende Supabase-konto. Efter korrekt login gendanner serveren automatisk `app_metadata.role = admin` for den bekræftede, ikke-anonyme konto `hidesh@live.dk`, og browseren opdaterer sessionens JWT. Dette kræver den eksisterende SUPABASE_SERVICE_ROLE_KEY; adgangskode og bruger-id ændres ikke. Andre konti får ikke automatisk administratoradgang. Bekræft også, at brugerens auth-id har en tilsvarende profiles-række, da posts.author_id refererer til profiles.
+2. Ejerens administratorrolle er nu tildelt manuelt i Supabase og login bekræftet af ejeren. Engangsscriptet er slettet efter brug og dets sti er Git-ignoreret. Login tildeler ingen roller og bruger ingen service-role-nøgle.
 3. Kør først `supabase/migrations/20260909210000_harden_portfolio_access.sql` og derefter `supabase/migrations/20260909220000_contact_spam_protection.sql` på den eksisterende database. Den forudsætter eksisterende `published_at`-kolonner, som applikationen allerede bruger. Test migration og admin-adgang i staging først. Gamle migrationer har modstridende skemaer og bør ikke genafspilles blindt på en ny database.
 4. Sæt NEXT_PUBLIC_SUPABASE_URL, NEXT_PUBLIC_SUPABASE_ANON_KEY, SUPABASE_SERVICE_ROLE_KEY, RESEND_API_KEY, CONTACT_EMAIL og ALTCHA_HMAC_KEY. Lokalt placeres værdier i apps/web/.env.local; på Vercel i projektets miljøvariabler. ALTCHA_HMAC_KEY skal være en unik tilfældig hemmelighed på mindst 32 tegn. Generér f.eks. med `node -e "console.log(require('node:crypto').randomBytes(32).toString('hex'))"`.
 5. Sæt eventuelle Clarity-variabler. Kontroller en rigtig admin-session, upload/omdøbning, blogredigering og kontaktbesked i staging. En kontaktformular uden migration/konfiguration afviser sikkert og viser en alternativ e-mailadresse.
@@ -27,7 +27,7 @@ Der er ikke adgang til din live-Supabase/Vercel-konfiguration i denne opgave. F�
 
 - pnpm audit: **0 kendte sårbarheder**, 1.105 dependencies, inklusive udviklingsdependencies. Ingen advisories er undertrykt.
 - Hele monorepoets produktionsbuild og TypeScript-kontrol er kørt med succes.
-- 46 tests for adgangskontrol, API-handlers, CAPTCHA, JSON-grænser, sidens centrale navigation og gendannelse af ejerens administratorrolle med opdatering af sessionen.
+- 52 tests for adgangskontrol, API-handlers, CAPTCHA, JSON-grænser, sidens centrale navigation og afvisning af automatisk rollegendannelse samt opdatering af sessionen.
 - Edge/Chromium: 320, 390, 768 og 1440 pixelbredder, lys/mørk tilstand, mobilmenu/Escape, 3D-pause, reduceret bevægelse og en rigtig lokal CAPTCHA-løsning. Ingen pageerrors eller vandret overflow. Ingen rigtige kontaktbeskeder blev sendt.
 - `node scripts/verify-portfolio.cjs` gentager browserkontrollen mod en kørende lokal server på port 3000 (PREVIEW_URL og BROWSER_CHANNEL kan ændres). Serveren skal have en lokal ALTCHA_HMAC_KEY. Screenshots gemmes i .npm-cache.
 - Repoets fulde ESLint-kontrol er fortsat ikke grøn: eksisterende `any`-typer, React Hooks-regler og ældre komponenter kræver separat oprydning. Reglerne er ikke slået fra for at skjule dette. Den gamle CI indeholder også legacy E2E-/formatkrav, som ikke er fuldt valideret i denne opgave.
@@ -37,7 +37,11 @@ Der er ikke adgang til din live-Supabase/Vercel-konfiguration i denne opgave. F�
 
 CAPTCHA-challengens `expires` sendes nu som Unix-sekunder, som ALTCHA forventer. Millisekunder fik widgettens udløbstimer til at overskride browserens timergrænse og udløbe næsten straks. Serverkontrollen bruger samme enhed. `scripts/verify-captcha-expiry.cjs` er kørt med Chromium og WebKit i mobilstørrelse: en løst CAPTCHA forbliver gyldig efter 20 sekunder og udløber efter fem minutter. Testen bruger browserens virtuelle ur; den er ikke en test på en fysisk iPhone. WebKit installeres med `playwright install webkit`; scriptet kræver en kørende lokal server med ALTCHA_HMAC_KEY.
 
-Login-afvisningen skyldtes det nye administratorrollekrav, ikke en ændret adgangskode. Den nye same-origin-endpoint `/api/auth/admin-session` verificerer brugeren hos Supabase før gendannelse af ejerrollen. Tests dækker også afvisning af andre, ubekræftede og anonyme konti samt fejl fra serveren. Rettelserne er bygget og testet lokalt; ejerens rigtige live-login og deployment er ikke udført i denne opgave.
+Login-afvisningen skyldtes det nye administratorrollekrav, ikke en ændret adgangskode. Efter sikkerhedsgennemgangen er automatisk gendannelse ud fra e-mail fjernet. Same-origin-endpointet `/api/auth/admin-session` bruger kun `auth.getUser()` og kontrollerer eksisterende serverstyrede roller; det bruger ingen service-role-nøgle og ændrer ingen konti. En fjernet rolle forbliver fjernet. Ejeren har efterfølgende kørt engangs-SQL med sit faste bruger-id og bekræftet, at live-login virker. Engangsscriptet er derefter slettet fra workspace. De seneste kodeændringer er ikke deployet i denne opgave.
+
+Git ignorerer nu alle `.env*`-filer undtagen `.env.example`, inklusive backup- og testvarianter. Clarity-modulet med den private API-token har også en eksplicit `server-only`-grænse.
+
+Live-opfølgning: kontroller Supabase Auths login-rategrænser og e-mailbekræftelse, og deaktiver offentlig tilmelding, hvis kun ejeren skal bruge Auth. MFA er ikke implementeret eller påkrævet i denne ændring; det kræver et komplet tilmeldings-/challengeforløb og AAL2-kontrol på både API og RLS, før det kan håndhæves uden at låse ejeren ude. Ingen live-indstillinger eller nøgler er ændret.
 
 ## Kilder
 
@@ -52,3 +56,11 @@ Begge nye migrationer er kørt mod en lokal PostgreSQL-motor (PGlite) med Supaba
 Kør lokalt med `npm install --prefix .npm-cache/sql-test --ignore-scripts --no-package-lock @electric-sql/pglite` og `node scripts/verify-contact-database.cjs`. Dette testværktøj er isoleret fra applikationens dependencies. Kontakt og spamregistrering gemmes nu atomisk via submit_contact, så et databaseproblem ikke forbruger brugerens CAPTCHA uden at gemme beskeden. Spamregistre ældre end 24 timer fjernes ved næste indsendelse.
 
 IP-headerens tillidsgrænse følger [Vercels dokumentation](https://vercel.com/docs/headers/request-headers). Ingen rigtige spam- eller kontaktbeskeder er sendt under testene. Beskyttelsen er endnu ikke aktiveret på din live-side; det kræver begge migrationer, miljøvariablerne og deployment.
+
+## CMS og login – responsivt design og funktionskontrol
+
+Login og CMS bruger nu portfolioens grønne/cremefarvede design med kobberfarvede handlinger, større trykflader og mobiltilpasset editor. Dialoger holder tastaturfokus og understøtter Escape. Indlæg hentes ikke længere dobbelt, eksisterende publiceringstid bevares ved redigering, og fejlet gemning bevarer kladden. Beskedfiltre beholder korrekte tællere. Mediefejl vises med genforsøg; omdøbning lukker gamle filoplysninger, og gentagen billedskalering bruger opdaterede tekstpositioner.
+
+`node scripts/verify-cms.cjs` bygger et isoleret UI-testmiljø i `.npm-cache/cms-preview` med de rigtige komponenter og fiktiv auth/API. Det tilføjer ingen testadgang til Next.js-applikationen. Browserkontrollen dækker 320/390/768/1440 px, login og passwordvisning, tema, navigation, oprettelse/preview/upload, beskedfiltre/status/sletning, medier/omdøbning/sletning, analytics-visning og logout. Unit-tests dækker også redigering med bevaret dato samt fejl ved gemning og hentning. Produktionsbuild og 52 tests består. Browser-testene beviser ikke live-mail, Clarity-sync eller Supabase/RLS-mutationer på den deployede database; de kræver kontrol efter deployment.
+
+Engangsscriptet er fjernet og ignoreret. De almindelige testværktøjer under scripts beholdes til vedligeholdelse; de indeholder ingen private nøgler og ligger ikke under Next.js public-mappen. Git-ignore fjerner ikke eventuelle tidligere commits fra historikken.
