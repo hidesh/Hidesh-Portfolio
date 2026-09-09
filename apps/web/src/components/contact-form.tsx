@@ -1,7 +1,15 @@
 'use client'
 
 import { useState, useEffect, useRef } from 'react'
-import { Mail, User, MessageSquare, Send, CheckCircle, AlertCircle, Shield } from 'lucide-react'
+import {
+  Mail,
+  User,
+  MessageSquare,
+  Send,
+  CheckCircle,
+  AlertCircle,
+  Shield,
+} from 'lucide-react'
 
 export function ContactForm() {
   const [formData, setFormData] = useState({
@@ -9,14 +17,21 @@ export function ContactForm() {
     email: '',
     subject: '',
     message: '',
+    website: '',
   })
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle')
+  const [status, setStatus] = useState<
+    'idle' | 'loading' | 'success' | 'error'
+  >('idle')
   const [errorMessage, setErrorMessage] = useState('')
   const [altchaPayload, setAltchaPayload] = useState<string | null>(null)
   const [widgetLoaded, setWidgetLoaded] = useState(false)
-  const widgetRef = useRef<any>(null)
+  const widgetRef = useRef<(HTMLElement & { reset?: () => void }) | null>(null)
 
   useEffect(() => {
+    void import('altcha').catch(() => {
+      setStatus('error')
+      setErrorMessage('Verification could not load. Please email me directly.')
+    })
     // Wait for custom element to be defined
     if (typeof window !== 'undefined' && customElements) {
       customElements.whenDefined('altcha-widget').then(() => {
@@ -28,18 +43,19 @@ export function ContactForm() {
   useEffect(() => {
     if (!widgetLoaded) return
 
-    const handleStateChange = (ev: CustomEvent) => {
+    const handleStateChange = (event: Event) => {
+      const ev = event as CustomEvent<{ state: string; payload: string }>
       if (ev.detail.state === 'verified') {
         setAltchaPayload(ev.detail.payload)
       } else {
         setAltchaPayload(null)
       }
     }
-    
+
     const widget = widgetRef.current
     if (widget) {
       widget.addEventListener('statechange', handleStateChange)
-      
+
       return () => {
         widget.removeEventListener('statechange', handleStateChange)
       }
@@ -77,23 +93,35 @@ export function ContactForm() {
       }
 
       setStatus('success')
-      setFormData({ name: '', email: '', subject: '', message: '' })
+      setFormData({
+        name: '',
+        email: '',
+        subject: '',
+        message: '',
+        website: '',
+      })
       setAltchaPayload(null)
-      
+
       // Reset ALTCHA widget
       if (widgetRef.current && typeof widgetRef.current.reset === 'function') {
         widgetRef.current.reset()
       }
-      
+
       // Reset success message after 5 seconds
       setTimeout(() => setStatus('idle'), 5000)
     } catch (error) {
       setStatus('error')
-      setErrorMessage(error instanceof Error ? error.message : 'Something went wrong')
+      setErrorMessage(
+        error instanceof Error ? error.message : 'Something went wrong'
+      )
+      setAltchaPayload(null)
+      widgetRef.current?.reset?.()
     }
   }
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (
+    e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
+  ) => {
     setFormData(prev => ({
       ...prev,
       [e.target.name]: e.target.value,
@@ -104,9 +132,23 @@ export function ContactForm() {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl mx-auto">
+      <div hidden aria-hidden="true">
+        <label htmlFor="contact-website">Leave this field empty</label>
+        <input
+          id="contact-website"
+          name="website"
+          value={formData.website}
+          onChange={handleChange}
+          tabIndex={-1}
+          autoComplete="off"
+        />
+      </div>
       {/* Name Field */}
       <div className="space-y-2">
-        <label htmlFor="name" className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <label
+          htmlFor="name"
+          className="flex items-center gap-2 text-sm font-medium text-foreground"
+        >
           <User className="h-4 w-4 text-branding-600" />
           Name
         </label>
@@ -125,7 +167,10 @@ export function ContactForm() {
 
       {/* Email Field */}
       <div className="space-y-2">
-        <label htmlFor="email" className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <label
+          htmlFor="email"
+          className="flex items-center gap-2 text-sm font-medium text-foreground"
+        >
           <Mail className="h-4 w-4 text-branding-600" />
           Email
         </label>
@@ -144,7 +189,10 @@ export function ContactForm() {
 
       {/* Subject Field */}
       <div className="space-y-2">
-        <label htmlFor="subject" className="flex items-center gap-2 text-sm font-medium text-foreground">
+        <label
+          htmlFor="subject"
+          className="flex items-center gap-2 text-sm font-medium text-foreground"
+        >
           <MessageSquare className="h-4 w-4 text-branding-600" />
           Subject
         </label>
@@ -163,12 +211,17 @@ export function ContactForm() {
 
       {/* Message Field */}
       <div className="space-y-2">
-        <label htmlFor="message" className="flex items-center justify-between text-sm font-medium text-foreground">
+        <label
+          htmlFor="message"
+          className="flex items-center justify-between text-sm font-medium text-foreground"
+        >
           <span className="flex items-center gap-2">
             <MessageSquare className="h-4 w-4 text-branding-600" />
             Message
           </span>
-          <span className={`text-xs ${remainingChars < 100 ? 'text-red-500' : 'text-muted-foreground'}`}>
+          <span
+            className={`text-xs ${remainingChars < 100 ? 'text-red-500' : 'text-muted-foreground'}`}
+          >
             {remainingChars} characters remaining
           </span>
         </label>
@@ -195,10 +248,11 @@ export function ContactForm() {
           {!widgetLoaded ? (
             <div className="flex items-center justify-center py-8">
               <div className="h-6 w-6 border-2 border-branding-600 border-t-transparent rounded-full animate-spin" />
-              <span className="ml-3 text-sm text-muted-foreground">Loading verification...</span>
+              <span className="ml-3 text-sm text-muted-foreground">
+                Loading verification...
+              </span>
             </div>
           ) : (
-            // @ts-ignore - Custom element type defined in src/types/altcha.d.ts
             <altcha-widget
               ref={widgetRef}
               challengeurl="/api/altcha/challenge"
@@ -213,14 +267,22 @@ export function ContactForm() {
 
       {/* Status Messages */}
       {status === 'success' && (
-        <div className="flex items-center gap-2 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-600 dark:text-green-400">
+        <div
+          role="status"
+          className="flex items-center gap-2 p-4 bg-green-500/10 border border-green-500/20 rounded-lg text-green-600 dark:text-green-400"
+        >
           <CheckCircle className="h-5 w-5 flex-shrink-0" />
-          <p className="text-sm font-medium">Message sent successfully! I'll get back to you soon.</p>
+          <p className="text-sm font-medium">
+            Message sent successfully! I’ll get back to you soon.
+          </p>
         </div>
       )}
 
       {status === 'error' && (
-        <div className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400">
+        <div
+          role="alert"
+          className="flex items-center gap-2 p-4 bg-red-500/10 border border-red-500/20 rounded-lg text-red-600 dark:text-red-400"
+        >
           <AlertCircle className="h-5 w-5 flex-shrink-0" />
           <p className="text-sm font-medium">{errorMessage}</p>
         </div>

@@ -5,7 +5,7 @@ export async function GET() {
   try {
     const challenge = await generateAltchaChallenge()
     
-    return NextResponse.json(challenge)
+    return NextResponse.json(challenge, { headers: { 'Cache-Control': 'no-store, max-age=0' } })
   } catch (error) {
     console.error('Error generating ALTCHA challenge:', error)
     return NextResponse.json(

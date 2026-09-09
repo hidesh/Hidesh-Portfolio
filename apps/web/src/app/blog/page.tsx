@@ -39,7 +39,7 @@ interface BlogPost {
   created_at: string;
   updated_at: string;
   slug: string;
-  cover_image?: string;
+  cover_image?: string | null;
 }
 
 async function getBlogPosts(): Promise<BlogPost[]> {
@@ -49,6 +49,7 @@ async function getBlogPosts(): Promise<BlogPost[]> {
       .from('posts')
       .select('*')
       .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
       .order('created_at', { ascending: false });
 
     if (error) {

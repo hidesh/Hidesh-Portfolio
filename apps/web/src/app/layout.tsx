@@ -114,7 +114,7 @@ export default function RootLayout({
         <link rel="dns-prefetch" href="https://vercel-insights.com" />
         
         {/* ALTCHA Widget Script - Defer for performance */}
-        <script type="module" src="https://cdn.jsdelivr.net/npm/altcha@latest/dist/altcha.min.js" defer />
+
         
         {/* JSON-LD Structured Data for Google Rich Results */}
         <script

@@ -2,7 +2,7 @@ name: "CodeQL Security Analysis"
 
 on:
   push:
-    branches: [ "master" ]
+    branches: [ "main", "master" ]
     paths:
       - '**.ts'
       - '**.tsx'
@@ -11,7 +11,7 @@ on:
       - 'package.json'
       - 'pnpm-lock.yaml'
   pull_request:
-    branches: [ "master" ]
+    branches: [ "main", "master" ]
     paths:
       - '**.ts'
       - '**.tsx'
@@ -47,12 +47,12 @@ jobs:
     - name: Setup Node.js
       uses: actions/setup-node@v4
       with:
-        node-version: '20'
+        node-version: '22'
 
     - name: Setup pnpm
       uses: pnpm/action-setup@v4
       with:
-        version: 9
+        version: '8.15.4'
 
     - name: Get pnpm store directory
       id: pnpm-cache

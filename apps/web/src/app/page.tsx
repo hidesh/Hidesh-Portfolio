@@ -1,27 +1,17 @@
-import React, { Suspense } from 'react'
+import React from 'react'
+import SignalSculpture from '@/components/ui/signal-sculpture'
+import './portfolio.css'
 import dynamic from 'next/dynamic'
 import Image from 'next/image'
-import { Github, ExternalLink, Mail, Linkedin, ChevronDown } from 'lucide-react'
 import type { Metadata } from 'next'
 import { siteConfig, getOpenGraphMetadata, getTwitterMetadata } from '@/lib/seo'
 
 // Lazy load kun client komponenter med loading states
-const ScrollStack = dynamic(() => import('@/components/ui/scroll-stack-clean'))
-const CareerPath = dynamic(() => import('@/components/ui/career-path').then(mod => ({ default: mod.CareerPath })))
-const ThemeBackground = dynamic(() => import('@/components/ui/theme-background'))
-const ErrorBoundary = dynamic(() => import('@/components/ui/error-boundary').then(mod => ({ default: mod.ErrorBoundary })))
-const Orb = dynamic(() => import('@/components/ui/orb'))
-const ContactForm = dynamic(() => import('@/components/contact-form').then(mod => ({ default: mod.ContactForm })))
-
-interface Project {
-  id: string
-  title: string
-  summary: string
-  tags: string[]
-  cover_image: string | null
-  live_url: string | null
-  repo_url: string | null
-}
+const ContactForm = dynamic(() =>
+  import('@/components/contact-form').then(mod => ({
+    default: mod.ContactForm,
+  }))
+)
 
 export async function generateMetadata(): Promise<Metadata> {
   return {
@@ -49,93 +39,152 @@ export default function Home() {
     {
       id: '1',
       title: 'Automate Carwash',
-      summary: 'Progressive Web App for digitizing car wash operations. Features dynamic pricing algorithm with API integration (license plate, size, weight), online booking, customer login, real-time status, Firebase Cloud Messaging notifications, and Google Cloud Storage for images. Built with React, Node.js/Express, Supabase (PostgreSQL). Mobile-first PWA that reduces manual errors and increases revenue through automation.',
-      tags: ['React', 'Node.js', 'Express', 'Supabase', 'PostgreSQL', 'Firebase', 'Google Cloud', 'PWA'],
+      summary:
+        'Progressive Web App for digitizing car wash operations. Features dynamic pricing algorithm with API integration (license plate, size, weight), online booking, customer login, real-time status, Firebase Cloud Messaging notifications, and Google Cloud Storage for images. Built with React, Node.js/Express, Supabase (PostgreSQL). Mobile-first PWA that reduces manual errors and increases revenue through automation.',
+      tags: [
+        'React',
+        'Node.js',
+        'Express',
+        'Supabase',
+        'PostgreSQL',
+        'Firebase',
+        'Google Cloud',
+        'PWA',
+      ],
       cover_image: null,
       live_url: 'https://auto-carwash-code.vercel.app',
-      repo_url: null
+      repo_url: null,
     },
     {
-      id: '2', 
+      id: '2',
       title: 'SQL Agent - Support Solutions',
-      summary: 'AI-powered SQL agent system for automated support solutions with intelligent query generation and data analysis.',
+      summary:
+        'AI-powered SQL agent system for automated support solutions with intelligent query generation and data analysis.',
       tags: ['AI', 'SQL', 'Python', 'Machine Learning', 'Automation'],
       cover_image: null,
       live_url: null,
-      repo_url: 'https://github.com/hidesh/sql-agent---Support-Solutions'
+      repo_url: 'https://github.com/hidesh/sql-agent---Support-Solutions',
     },
     {
       id: '3',
-      title: 'Support Solutions RAG', 
-      summary: 'Retrieval-Augmented Generation system for intelligent support documentation and knowledge base management.',
+      title: 'Support Solutions RAG',
+      summary:
+        'Retrieval-Augmented Generation system for intelligent support documentation and knowledge base management.',
       tags: ['RAG', 'AI', 'LangChain', 'Vector Database', 'NLP'],
       cover_image: null,
       live_url: null,
-      repo_url: 'https://github.com/hidesh/supportsolutions-rag'
+      repo_url: 'https://github.com/hidesh/supportsolutions-rag',
     },
     {
       id: '4',
       title: 'Newsletter Automation',
-      summary: 'Automated newsletter system with intelligent content generation, scheduling, and distribution capabilities.',
-      tags: ['Automation', 'Node.js', 'Email Marketing', 'Scheduling', 'API Integration'],
+      summary:
+        'Automated newsletter system with intelligent content generation, scheduling, and distribution capabilities.',
+      tags: [
+        'Automation',
+        'Node.js',
+        'Email Marketing',
+        'Scheduling',
+        'API Integration',
+      ],
       cover_image: null,
       live_url: null,
-      repo_url: 'https://github.com/hidesh/Newsletter-Automation'
-    }
+      repo_url: 'https://github.com/hidesh/Newsletter-Automation',
+    },
   ]
 
-  // Mock skills data til vi får en rigtig getSkills funktion
+  // Mock skills data til vi fÃ¥r en rigtig getSkills funktion
   const skillCategories = [
     {
       title: 'Frontend Development',
       color: 'bg-gradient-to-br from-branding-500 to-branding-700',
       skills: [
-        'React', 'Vue.js', 'Angular', 'Next.js', 'Nuxt.js', 'Svelte',
-        'TypeScript', 'JavaScript', 'HTML5', 'CSS3', 'Sass', 'Tailwind CSS'
-      ]
+        'React',
+        'Vue.js',
+        'Angular',
+        'Next.js',
+        'Nuxt.js',
+        'Svelte',
+        'TypeScript',
+        'JavaScript',
+        'HTML5',
+        'CSS3',
+        'Sass',
+        'Tailwind CSS',
+      ],
     },
     {
-      title: 'Backend Development', 
+      title: 'Backend Development',
       color: 'bg-gradient-to-br from-primary-600 to-primary-800',
       skills: [
-        'Node.js', 'Express', 'PHP', 'Laravel', 'C#', '.NET',
-        'Java (Spring)', 'Ruby', 'Python'
-      ]
+        'Node.js',
+        'Express',
+        'PHP',
+        'Laravel',
+        'C#',
+        '.NET',
+        'Java (Spring)',
+        'Ruby',
+        'Python',
+      ],
     },
     {
       title: 'AI & Machine Learning',
       color: 'bg-gradient-to-br from-purple-600 to-purple-800',
       skills: [
-        'n8n', 'RAG', 'LangChain', 'OpenAI API', 'Anthropic Claude',
-        'Vector Databases', 'Embeddings', 'Prompt Engineering', 'Fine-tuning',
-        'TensorFlow', 'PyTorch', 'Hugging Face'
-      ]
+        'n8n',
+        'RAG',
+        'LangChain',
+        'OpenAI API',
+        'Anthropic Claude',
+        'Vector Databases',
+        'Embeddings',
+        'Prompt Engineering',
+        'Fine-tuning',
+        'TensorFlow',
+        'PyTorch',
+        'Hugging Face',
+      ],
     },
     {
       title: 'Cloud & Infrastructure',
       color: 'bg-gradient-to-br from-blue-600 to-blue-800',
       skills: [
-        'AWS', 'Google Cloud', 'Azure', 'Supabase', 'Firebase',
-        'Vercel', 'Netlify', 'DigitalOcean', 'Heroku', 'Railway'
-      ]
+        'AWS',
+        'Google Cloud',
+        'Azure',
+        'Supabase',
+        'Firebase',
+        'Vercel',
+        'Netlify',
+        'DigitalOcean',
+        'Heroku',
+        'Railway',
+      ],
     },
     {
       title: 'Database & Storage',
       color: 'bg-gradient-to-br from-mid-gray to-dark-gray',
-      skills: [
-        'PostgreSQL', 'MySQL', 'MongoDB', 'Firebase', 'Redis'
-      ]
+      skills: ['PostgreSQL', 'MySQL', 'MongoDB', 'Firebase', 'Redis'],
     },
     {
       title: 'Business & Consulting',
       color: 'bg-gradient-to-br from-branding-500 to-branding-700',
       skills: [
-        'Digital Transformation', 'Technical Sales', 'IT Consulting', 
-        'Customer Support', 'Product Strategy', 'Project Management',
-        'Client Relations', 'Technical Training', 'System Integration',
-        'Troubleshooting', 'Service Delivery', 'Solution Architecture'
-      ]
-    }
+        'Digital Transformation',
+        'Technical Sales',
+        'IT Consulting',
+        'Customer Support',
+        'Product Strategy',
+        'Project Management',
+        'Client Relations',
+        'Technical Training',
+        'System Integration',
+        'Troubleshooting',
+        'Service Delivery',
+        'Solution Architecture',
+      ],
+    },
   ]
 
   // Education timeline data
@@ -150,8 +199,8 @@ export default function Home() {
         'Specialization in modern web development with focus on React and Next.js',
         'Advanced frontend development and user experience design',
         'Full-stack projects with backend service integration',
-        'Agile development and team collaboration'
-      ]
+        'Agile development and team collaboration',
+      ],
     },
     {
       id: 2,
@@ -163,9 +212,9 @@ export default function Home() {
         'Fundamental competencies in web development and design',
         'UX/UI design and user-centered development',
         'Frontend technologies: HTML, CSS, JavaScript',
-        'Project management and creative problem solving'
-      ]
-    }
+        'Project management and creative problem solving',
+      ],
+    },
   ]
 
   // Work experience timeline data
@@ -181,8 +230,8 @@ export default function Home() {
         'Created backend logic in Node.js and Express for handling REST APIs and real-time updates',
         'Implemented real-time synchronization with Firebase and Google Cloud for secure file handling',
         'Improved performance and maintainability by optimizing data flow between frontend and backend',
-        'Designed entire UI and user journey in Figma, including a functional prototype'
-      ]
+        'Designed entire UI and user journey in Figma, including a functional prototype',
+      ],
     },
     {
       id: 2,
@@ -194,8 +243,8 @@ export default function Home() {
         'Advising customers on IT and electronics by combining sales skills with technical knowledge',
         'Performing complete setup of devices such as laptops, phones, and tablets',
         'Providing support to customers and colleagues with hardware and software troubleshooting',
-        'Communicating solutions clearly and understandably to a diverse customer base'
-      ]
+        'Communicating solutions clearly and understandably to a diverse customer base',
+      ],
     },
     {
       id: 3,
@@ -206,8 +255,8 @@ export default function Home() {
       description: [
         'Responsible for troubleshooting and monitoring of door entry systems, both on-site and via online platforms',
         'Provided technical support and customer service over the phone, focusing on clear communication and fast issue resolution',
-        'Installed and repaired intercom systems in residential buildings with a focus on reliability and a positive service experience'
-      ]
+        'Installed and repaired intercom systems in residential buildings with a focus on reliability and a positive service experience',
+      ],
     },
     {
       id: 4,
@@ -219,8 +268,8 @@ export default function Home() {
         'Developed responsive UI components in Next.js and Tailwind with focus on user-friendliness',
         'Integrated dynamic data and API endpoints for visualization of live statistics',
         'Worked in agile team with scrum, standups, and continuous improvements',
-        'Contributed to Git-flow and deployment processes'
-      ]
+        'Contributed to Git-flow and deployment processes',
+      ],
     },
     {
       id: 5,
@@ -231,336 +280,330 @@ export default function Home() {
       description: [
         'Provided individual guidance to students in development and programming projects',
         'Assisted with Adobe Creative Cloud (including Premiere Pro and Photoshop) for design and media projects',
-        'Responsible for the media department with photo, video and 3D-print, from technical setup to guidance'
-      ]
+        'Responsible for the media department with photo, video and 3D-print, from technical setup to guidance',
+      ],
     },
     {
       id: 6,
       type: 'work' as const,
-      title: 'Member & Participant – Girls in IT Zealand',
+      title: 'Member & Participant â€“ Girls in IT Zealand',
       company: 'Volunteer Work',
       period: 'September 2023 - Present',
       description: [
         'Participating in student initiative working to create more visibility and space for women in IT',
         'Contributing with help for workshops, design and development of the website (Vue.js)',
         'Working for diversity and for more women to be represented in the IT industry',
-        'Helping to ensure an inclusive community'
-      ]
-    }
+        'Helping to ensure an inclusive community',
+      ],
+    },
   ]
 
   return (
-    <div className="relative min-h-screen overflow-hidden bg-background/95 text-foreground">
-      {/* Hero Section */}
-      <section id="home" className="relative z-10 min-h-screen flex items-center justify-center px-6 pt-32">
-        <ErrorBoundary fallback={<div className="fixed inset-0 bg-background/50 pointer-events-none z-0" />}>
-          <ThemeBackground />
-        </ErrorBoundary>
-        <div className="container mx-auto text-center relative z-20">
-          {/* Profile Image with 3D Orb Ring */}
-          <div className="mb-12 flex justify-center">
-            <div className="relative w-72 h-72 md:w-96 md:h-96">
-              {/* 3D Orb Ring - Full Container */}
-              <div className="absolute inset-0">
-                <ErrorBoundary fallback={
-                  <div className="w-full h-full rounded-full bg-gradient-to-br from-branding-500 via-branding-600 to-branding-800 opacity-20"></div>
-                }>
-                  <Orb
-                    hue={200}
-                    hoverIntensity={2.5}
-                    rotateOnHover={false}
-                    forceHoverState={false}
-                  />
-                </ErrorBoundary>
-              </div>
-              
-              {/* Profile Image Centered on Top */}
-              <div className="absolute inset-0 flex items-center justify-center z-10">
-                <div className="relative w-40 h-40 md:w-52 md:h-52">
-                  <div className="h-full w-full rounded-full overflow-hidden ring-4 ring-background shadow-2xl">
-                    <ErrorBoundary fallback={<div className="w-full h-full bg-muted flex items-center justify-center text-muted-foreground text-2xl font-bold">HK</div>}>
-                      <Image
-                        src="/Hidesh-profile.png"
-                        alt="Hidesh Kumar - Software Engineer"
-                        width={208}
-                        height={208}
-                        priority
-                        className="w-full h-full object-cover"
-                        sizes="(max-width: 768px) 160px, 208px"
-                        quality={90}
-                      />
-                    </ErrorBoundary>
+    <div className="portfolio">
+      <section id="home" className="portfolio-hero portfolio-shell">
+        <div className="hero-copy">
+          <p className="eyebrow">
+            <span className="status-dot" /> SOFTWARE ENGINEER · BASED IN DENMARK
+          </p>
+          <h1>
+            Human ideas.
+            <br />
+            Thoughtful code.
+            <br />
+            <em>Real impact.</em>
+          </h1>
+          <p className="hero-description">
+            I’m Hidesh. I build web experiences and intelligent tools that make
+            complex things feel simple.
+          </p>
+          <div className="portfolio-actions">
+            <a href="#projects" className="portfolio-button">
+              Explore my work <span aria-hidden="true">↗</span>
+            </a>
+            <a href="#contact" className="portfolio-text-link">
+              Let’s talk <span aria-hidden="true">↗</span>
+            </a>
+          </div>
+          <div className="hero-person">
+            <Image
+              src="/Hidesh-profile.png"
+              alt="Hidesh Kumar"
+              width={44}
+              height={44}
+              priority
+            />
+            <span>
+              Developer by craft.
+              <br />
+              <strong>Creative by nature.</strong>
+            </span>
+          </div>
+        </div>
+        <SignalSculpture />
+        <div className="hero-bottom">
+          <span>WEB DEVELOPMENT / AI / AUTOMATION</span>
+          <a href="#projects">SCROLL TO EXPLORE ↓</a>
+        </div>
+      </section>
+
+      <section id="projects" className="portfolio-section portfolio-shell">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">01 / SELECTED WORK</p>
+            <h2>Ideas put to work.</h2>
+          </div>
+          <p>
+            A few things I’ve built to connect people,
+            <br />
+            simplify workflows, and solve real problems.
+          </p>
+        </div>
+        <div className="work-grid">
+          {projects.map((project, index) => (
+            <article key={project.id} className="work-card">
+              <a
+                className={`work-visual work-visual-${index}`}
+                href={project.live_url || project.repo_url || '#contact'}
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label={`Explore ${project.title}`}
+              >
+                <span className="work-number">
+                  0{index + 1} /{' '}
+                  {index === 0
+                    ? 'WEB APPLICATION'
+                    : index === 3
+                      ? 'AUTOMATION'
+                      : 'APPLIED AI'}
+                </span>
+                {index === 0 ? (
+                  <div className="carwash-preview">
+                    <div className="preview-top">
+                      AUTOMATE <span>CARWASH ↗</span>
+                    </div>
+                    <div className="preview-title">
+                      A cleaner way
+                      <br />
+                      to book your wash.
+                    </div>
+                    <div className="preview-track">
+                      <span>01 Select</span>
+                      <span>02 Book</span>
+                      <span>03 Shine</span>
+                    </div>
+                    <div className="preview-cta">
+                      Your next wash, simplified. →
+                    </div>
                   </div>
+                ) : index === 1 ? (
+                  <div className="code-preview">
+                    <span>ASK A QUESTION</span>
+                    <p>What does the data tell us?</p>
+                    <code>
+                      <b>SELECT</b> answers
+                      <br />
+                      <b>FROM</b> your_data
+                      <br />
+                      <b>WHERE</b> complexity = 0;
+                    </code>
+                  </div>
+                ) : index === 2 ? (
+                  <div className="rag-preview">
+                    <span>DOCUMENTS</span>
+                    <div>
+                      KNOWLEDGE <span>↗</span>
+                    </div>
+                    <span>CONNECTED TO THE RIGHT ANSWER</span>
+                  </div>
+                ) : (
+                  <div className="flow-preview">
+                    <span>IDEA</span>
+                    <i>→</i>
+                    <span>CREATE</span>
+                    <i>→</i>
+                    <span>SEND</span>
+                  </div>
+                )}
+                <span className="visual-note">
+                  PROJECT CONCEPT / {project.tags[0].toUpperCase()}
+                </span>
+                <span className="work-arrow" aria-hidden="true">
+                  ↗
+                </span>
+              </a>
+              <div className="work-info">
+                <h3>
+                  <a
+                    href={project.live_url || project.repo_url || '#contact'}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    {project.title}
+                  </a>
+                </h3>
+                <p>
+                  {index === 0
+                    ? 'A mobile-first booking platform connecting customers, pricing, and daily car wash operations.'
+                    : project.summary}
+                </p>
+                <div className="work-tags">
+                  {project.tags.slice(0, 4).map(tag => (
+                    <span key={tag}>{tag}</span>
+                  ))}
                 </div>
               </div>
+            </article>
+          ))}
+        </div>
+      </section>
+
+      <section id="about" className="about-section">
+        <div className="portfolio-shell about-grid">
+          <div>
+            <p className="eyebrow">02 / THE PERSON BEHIND THE CODE</p>
+            <h2>
+              Technical mind.
+              <br />
+              <em>Creative instinct.</em>
+            </h2>
+            <div className="about-portrait">
+              <Image
+                src="/Hidesh-profile.png"
+                alt="Portrait of Hidesh Kumar"
+                width={240}
+                height={280}
+                sizes="240px"
+              />
+              <span>
+                HIDESH KUMAR
+                <br />
+                DEVELOPER & MAKER
+              </span>
             </div>
           </div>
+          <div className="about-copy">
+            <p>
+              I work at the intersection of software, design, and the people who
+              use it.
+            </p>
+            <p>
+              From full-stack web applications to AI-powered support tools, I
+              enjoy turning complicated workflows into useful, approachable
+              experiences. My background in technical support keeps me close to
+              the problems people actually need solved.
+            </p>
+            <p>
+              Outside of code, I make music. The same curiosity drives both:
+              finding patterns, experimenting with ideas, and caring about the
+              details that make something feel right.
+            </p>
+            <a href="#contact" className="portfolio-text-link">
+              Have something in mind? Let’s connect ↗
+            </a>
+          </div>
+        </div>
+      </section>
 
-          <h1 className="text-5xl md:text-7xl lg:text-8xl font-bold mb-6 animate-fade-in">
-            <span className="text-foreground">Hi, I&apos;m </span>
-            <span className="text-gradient">Hidesh</span>
-          </h1>
-          
-          <p className="text-xl md:text-2xl text-muted-foreground mb-8 max-w-3xl mx-auto leading-relaxed animate-fade-in">
-            Software Engineer passionate about building exceptional digital experiences 
-            with modern technologies
+      <section id="skills" className="portfolio-section portfolio-shell">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">03 / MY TOOLKIT</p>
+            <h2>Built on curiosity.</h2>
+          </div>
+          <p>
+            The technologies and disciplines
+            <br />I bring together in my work.
           </p>
+        </div>
+        <div className="toolkit-grid">
+          {skillCategories.map((category, index) => (
+            <div key={category.title} className="toolkit-item">
+              <span className="eyebrow">0{index + 1}</span>
+              <h3>{category.title}</h3>
+              <p>{category.skills.slice(0, 8).join(' · ')}</p>
+            </div>
+          ))}
+        </div>
+      </section>
 
-          <div className="flex flex-wrap justify-center gap-4 mb-12 animate-fade-in">
-            <a
-              href="#contact"
-              className="btn-primary px-8 py-4 bg-gradient-to-r from-branding-600 to-branding-800 hover:from-branding-500 hover:to-branding-700 text-white font-semibold rounded-xl transition-all duration-300 glow-hover"
-            >
-              Get In Touch
-            </a>
-            <a
-              href="#projects"
-              className="px-8 py-4 border-2 border-branding-500 text-branding-600 hover:bg-branding-500 hover:text-white font-semibold rounded-xl transition-all duration-300"
-            >
-              View Projects
-            </a>
-          </div>
-
-          <div className="flex justify-center space-x-6 mb-16">
-            <a
-              href="https://github.com/hidesh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 p-3 rounded-full hover:bg-branding-500/10"
-              aria-label="GitHub"
-            >
-              <Github className="h-6 w-6" />
-            </a>
-            <a
-              href="https://linkedin.com/in/hidesh"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 p-3 rounded-full hover:bg-branding-500/10"
-              aria-label="LinkedIn"
-            >
-              <Linkedin className="h-6 w-6" />
-            </a>
-            <a
-              href="mailto:hidesh@live.dk"
-              className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 p-3 rounded-full hover:bg-branding-500/10"
-              aria-label="Email"
-            >
-              <Mail className="h-6 w-6" />
-            </a>
+      <section id="experience" className="portfolio-section portfolio-shell">
+        <div className="section-heading">
+          <div>
+            <p className="eyebrow">04 / THE JOURNEY</p>
+            <h2>Always moving forward.</h2>
           </div>
         </div>
-      </section>
-
-      {/* About Me Section */}
-      <section id="about" className="relative z-10 py-20 px-6 bg-muted/30">
-        <div className="container mx-auto max-w-4xl">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
-            About Me
-          </h2>
-          
-          <div className="prose prose-lg max-w-none text-muted-foreground leading-relaxed">
-            <p className="text-xl mb-6">
-              As a software engineer with a focus on innovation and efficiency, I have dedicated my career to 
-              creating digital solutions that transform businesses and improve user experiences. My approach to 
-              development is driven by a deep understanding of both technical possibilities and business needs.
-            </p>
-            
-            <p className="text-lg mb-6">
-              My professional experience spans broadly across <span className="text-branding-500 font-semibold">digital transformation</span>, 
-              where I have helped companies modernize their technological infrastructure and optimize their workflows. 
-              Through work with <span className="text-branding-500 font-semibold">AI development for sales and consulting</span>, I have 
-              specialized in building intelligent systems that automate processes and create value for customers.
-            </p>
-
-            <p className="text-lg mb-6">
-              As a <span className="text-branding-500 font-semibold">technical consultant</span>, I focus on delivering 
-              strategic solutions that match companies' long-term goals. My experience with 
-              <span className="text-branding-500 font-semibold"> IT support and customer service</span> has taught me the importance 
-              of simplifying complex technical concepts and delivering exceptional customer guidance throughout the implementation process.
-            </p>
-
-            <p className="text-lg mb-6">
-              Beyond my technical career, I have a passion for <span className="text-branding-500 font-semibold">music production</span>, 
-              which gives me a creative outlet and a unique perspective on problem-solving. This combination of technical expertise 
-              and creative thinking helps me approach development tasks from innovative angles and create solutions that are both 
-              functional and aesthetically appealing.
-            </p>
-
-            <p className="text-lg">
-              My development process is characterized by thorough planning, iterative design, and close collaboration with clients 
-              to ensure that the final product not only meets but exceeds expectations. I believe that technology 
-              is most powerful when it makes life easier for those who use it.
-            </p>
+        <div className="journey-grid">
+          <div>
+            <h3 className="journey-label">EXPERIENCE</h3>
+            {workTimeline.map(item => (
+              <details className="journey-item" key={item.id}>
+                <summary>
+                  <span>
+                    <strong>{item.title}</strong>
+                    <span>{item.company}</span>
+                  </span>
+                  <span className="journey-period">
+                    {item.period}
+                    <b aria-hidden="true">+</b>
+                  </span>
+                </summary>
+                <ul>
+                  {item.description.map(line => (
+                    <li key={line}>{line}</li>
+                  ))}
+                </ul>
+              </details>
+            ))}
           </div>
-        </div>
-      </section>
-
-      {/* Education Section */}
-      <section id="education" className="relative z-10 py-20 px-6">
-        <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
-            Education
-          </h2>
-          <CareerPath items={educationTimeline} />
-        </div>
-      </section>
-
-      {/* Work Experience Section */}
-      <section id="experience" className="relative z-10 py-20 px-6 bg-muted/30">
-        <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
-            Work Experience
-          </h2>
-          <CareerPath items={workTimeline} />
-        </div>
-      </section>
-
-      {/* Projects Section */}
-      <section id="projects" className="relative z-10 py-20 px-6">
-        <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
-            Featured Projects
-          </h2>
-          
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-6xl mx-auto">
-            {projects?.map((project) => (
-              <div
-                key={project.id}
-                className="project-card group bg-muted/50 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-6 hover:border-branding-400 transition-all duration-300 flex flex-col h-full"
-              >
-                {project.cover_image && (
-                  <div className="mb-4 rounded-lg overflow-hidden flex-shrink-0">
-                    <img
-                      src={project.cover_image}
-                      alt={project.title}
-                      className="project-image w-full h-48 object-cover"
-                    />
-                  </div>
-                )}
-                
-                <h3 className="text-xl font-bold text-foreground mb-3 group-hover:text-branding-600 transition-colors flex-shrink-0">
-                  {project.title}
-                </h3>
-                
-                <p className="text-muted-foreground mb-4 text-sm leading-relaxed flex-grow line-clamp-4">
-                  {project.summary}
-                </p>
-                
-                {project.tags && (
-                  <div className="flex flex-wrap gap-2 mb-4 flex-shrink-0">
-                    {project.tags.map((tech: string) => (
-                      <span
-                        key={tech}
-                        className="px-3 py-1 text-xs font-medium bg-branding-500/20 text-branding-600 dark:text-branding-400 rounded-full"
-                      >
-                        {tech}
-                      </span>
-                    ))}
-                  </div>
-                )}
-                
-                <div className="flex space-x-4 flex-shrink-0 mt-auto">
-                  {project.live_url && (
-                    <a
-                      href={project.live_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-branding-600 hover:text-branding-700 transition-colors"
-                    >
-                      <ExternalLink className="h-5 w-5" />
-                    </a>
-                  )}
-                  {project.repo_url && (
-                    <a
-                      href={project.repo_url}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-branding-600 hover:text-branding-700 transition-colors"
-                    >
-                      <Github className="h-5 w-5" />
-                    </a>
-                  )}
-                </div>
+          <div id="education">
+            <h3 className="journey-label">EDUCATION</h3>
+            {educationTimeline.map(item => (
+              <div className="education-item" key={item.id}>
+                <span>{item.period}</span>
+                <h3>{item.title}</h3>
+                <p>{item.company}</p>
               </div>
             ))}
           </div>
         </div>
       </section>
 
-      {/* Skills Section */}
-      <section id="skills" className="relative z-10 py-20 px-6 bg-muted/30">
-        <div className="container mx-auto">
-          <h2 className="text-4xl md:text-5xl font-bold text-center mb-16 text-gradient">
-            Skills & Technologies
-          </h2>
-          <ErrorBoundary fallback={
-            <div className="max-w-6xl mx-auto">
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {[...Array(6)].map((_, i) => (
-                  <div key={i} className="bg-muted/50 rounded-xl p-6 animate-pulse">
-                    <div className="h-6 bg-muted rounded mb-4"></div>
-                    <div className="space-y-2">
-                      {[...Array(4)].map((_, j) => (
-                        <div key={j} className="h-4 bg-muted rounded w-3/4"></div>
-                      ))}
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          }>
-            <ScrollStack categories={skillCategories} />
-          </ErrorBoundary>
-        </div>
-      </section>
-
-      {/* Contact Section */}
-      <section id="contact" className="relative z-10 py-20 px-6">
-        <div className="container mx-auto max-w-3xl">
-          <div className="text-center mb-12">
-            <h2 className="text-4xl md:text-5xl font-bold mb-8 text-gradient">
-              Let&apos;s Connect
+      <section id="contact" className="portfolio-section contact-section">
+        <div className="portfolio-shell contact-grid">
+          <div>
+            <p className="eyebrow">05 / LET’S MAKE SOMETHING</p>
+            <h2>
+              Good things start
+              <br />
+              with a <em>hello.</em>
             </h2>
-            
-            <p className="text-muted-foreground text-lg mb-8 leading-relaxed">
-              I&apos;m always interested in hearing about new opportunities and exciting projects.
-              Let&apos;s build something amazing together!
+            <p>
+              A project, an opportunity, or an interesting idea?
+              <br />
+              I’d love to hear about it.
             </p>
-          </div>
-
-          <ContactForm />
-          
-          <div className="mt-12 text-center space-y-6">
-            <p className="text-muted-foreground text-sm">Or reach out directly:</p>
-            <a
-              href="mailto:hidesh@live.dk"
-              className="btn-primary inline-flex items-center px-8 py-4 bg-gradient-to-r from-branding-600 to-branding-800 hover:from-branding-500 hover:to-branding-700 text-white font-semibold rounded-xl transition-all duration-300 glow-hover"
-            >
-              <Mail className="h-5 w-5 mr-2" />
-              Send me an email
+            <a className="contact-email" href="mailto:hidesh@live.dk">
+              hidesh@live.dk ↗
             </a>
-            
-            <div className="flex justify-center space-x-6">
+            <div className="contact-socials">
               <a
                 href="https://github.com/hidesh"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 p-4 rounded-full hover:bg-branding-500/10"
-                aria-label="GitHub"
               >
-                <Github className="h-8 w-8" />
+                GitHub ↗
               </a>
               <a
                 href="https://linkedin.com/in/hidesh"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-muted-foreground hover:text-branding-600 transition-colors duration-200 p-4 rounded-full hover:bg-branding-500/10"
-                aria-label="LinkedIn"
               >
-                <Linkedin className="h-8 w-8" />
+                LinkedIn ↗
               </a>
             </div>
           </div>
+          <ContactForm />
         </div>
       </section>
     </div>

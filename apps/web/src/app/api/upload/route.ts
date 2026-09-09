@@ -1,13 +1,17 @@
+import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     const formData = await request.formData()
-    const file = formData.get('file') as File
-    const altText = formData.get('altText') as string
+    const file = formData.get('file')
+    const rawAlt = formData.get('altText')
+    const altText = typeof rawAlt === 'string' ? rawAlt : ''
     
-    if (!file) {
+    if (!(file instanceof File)) {
       return NextResponse.json({ error: 'No file provided' }, { status: 400 })
     }
 
@@ -30,7 +34,12 @@ export async function POST(request: NextRequest) {
     }
 
     // Generate SEO-friendly filename from alt text or original filename
-    const fileExt = file.name.split('.').pop()
+    const extensions: Record<string, string> = { 'image/jpeg': 'jpg', 'image/jpg': 'jpg', 'image/png': 'png', 'image/gif': 'gif', 'image/webp': 'webp' }
+    const fileExt = extensions[file.type]
+    const bytes = new Uint8Array(await file.slice(0, 12).arrayBuffer())
+    const hex = Buffer.from(bytes).toString('hex')
+    const valid = fileExt === 'jpg' ? hex.startsWith('ffd8ff') : fileExt === 'png' ? hex.startsWith('89504e470d0a1a0a') : fileExt === 'gif' ? ['GIF87a', 'GIF89a'].includes(Buffer.from(bytes.slice(0, 6)).toString()) : hex.startsWith('52494646') && Buffer.from(bytes.slice(8, 12)).toString() === 'WEBP'
+    if (!valid) return NextResponse.json({ error: 'File content does not match its image type' }, { status: 400 })
     const baseName = (altText || file.name.replace(/\.[^/.]+$/, ''))
       .toLowerCase()
       .replace(/[^a-z0-9]+/g, '-') // Replace non-alphanumeric with dashes

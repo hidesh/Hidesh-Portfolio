@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/admin'
 import { NextResponse } from 'next/server'
 import { getLatestAnalytics, saveAnalytics, getApiUsage, incrementApiUsage } from '@/lib/clarity/database'
 
@@ -11,13 +12,15 @@ import { getLatestAnalytics, saveAnalytics, getApiUsage, incrementApiUsage } fro
  * 2. Manual sync via POST endpoint updates the database
  */
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     // Get latest data from Supabase
     const latest = await getLatestAnalytics()
 
     if (!latest) {
-      console.log('📊 No analytics data in database yet')
+
       
       // Check if API token is configured
       const hasToken = !!process.env.CLARITY_API_TOKEN

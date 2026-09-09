@@ -37,6 +37,7 @@ export interface Database {
           created_at?: string
           updated_at?: string
         }
+        Relationships: []
       }
       projects: {
         Row: {
@@ -90,6 +91,7 @@ export interface Database {
           updated_at?: string
           published_at?: string | null
         }
+        Relationships: []
       }
       posts: {
         Row: {
@@ -131,6 +133,7 @@ export interface Database {
           updated_at?: string
           published_at?: string | null
         }
+        Relationships: []
       }
       contacts: {
         Row: {
@@ -157,6 +160,7 @@ export interface Database {
           created_at?: string
           handled?: boolean
         }
+        Relationships: []
       }
       pageviews: {
         Row: {
@@ -195,6 +199,7 @@ export interface Database {
           scroll_pct?: number | null
           created_at?: string
         }
+        Relationships: []
       }
       events: {
         Row: {
@@ -221,6 +226,7 @@ export interface Database {
           meta?: Json | null
           created_at?: string
         }
+        Relationships: []
       }
     }
     Views: {

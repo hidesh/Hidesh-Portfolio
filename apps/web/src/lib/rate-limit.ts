@@ -29,7 +29,7 @@ function cleanupExpired() {
 }
 
 // Run cleanup every minute
-setInterval(cleanupExpired, 60 * 1000)
+// Cleanup runs on each check; no timer keeps serverless workers alive.
 
 /**
  * Check if email has exceeded rate limit
@@ -50,6 +50,7 @@ export function checkRateLimit(email: string): {
   const entry = rateLimitStore.get(key)
   
   if (!entry || entry.resetAt < now) {
+    if (rateLimitStore.size >= 10000) return { allowed: false, remaining: 0, resetAt: now + WINDOW_MS }
     // No entry or expired - create new entry
     const resetAt = now + WINDOW_MS
     rateLimitStore.set(key, { count: 1, resetAt })

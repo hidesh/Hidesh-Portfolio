@@ -16,7 +16,7 @@ interface BlogPost {
   created_at: string;
   updated_at: string;
   slug: string;
-  cover_image?: string;
+  cover_image?: string | null;
 }
 
 interface PageProps {
@@ -32,6 +32,7 @@ async function getBlogPost(slug: string): Promise<BlogPost | null> {
       .from('posts')
       .select('*')
       .eq('slug', slug)
+      .lte('published_at', new Date().toISOString())
       .single();
 
     if (error || !data) {

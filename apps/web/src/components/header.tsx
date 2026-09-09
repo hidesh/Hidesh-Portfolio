@@ -6,7 +6,6 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Menu, X, Github, Linkedin, Mail } from 'lucide-react'
 import { ThemeToggle } from './ui/theme-toggle'
-import { SantaButton } from './christmas/santa-button'
 
 const navigation = [
   { name: 'Home', href: '/#home' },
@@ -32,8 +31,10 @@ export function Header() {
       setIsScrolled(window.scrollY > 50)
     }
 
-    window.addEventListener('scroll', handleScroll)
-    return () => window.removeEventListener('scroll', handleScroll)
+    const escape = (event: KeyboardEvent) => { if (event.key === 'Escape') setIsMobileMenuOpen(false) }
+    window.addEventListener('keydown', escape)
+    window.addEventListener('scroll', handleScroll, { passive: true })
+    return () => { window.removeEventListener('scroll', handleScroll); window.removeEventListener('keydown', escape) }
   }, [])
 
   return (
@@ -47,7 +48,7 @@ export function Header() {
         className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
           isScrolled
             ? 'bg-background/90 border-b border-branding-200 dark:border-branding-800'
-            : 'bg-transparent'
+            : 'bg-background/95 border-b border-border'
         }`}
       >
         <nav className="container mx-auto px-6 py-4 relative z-10">
@@ -65,7 +66,7 @@ export function Header() {
                   unoptimized
                 />
               </div>
-              <span className="text-xl font-bold text-gradient">
+              <span className="text-lg font-medium tracking-tight">
                 Hidesh Kumar
               </span>
             </Link>
@@ -86,7 +87,6 @@ export function Header() {
 
             {/* Social Links & Theme Toggle */}
             <div className="hidden lg:flex items-center space-x-4">
-              <SantaButton />
               {socialLinks.map((link) => {
                 const Icon = link.icon
                 return (
@@ -107,12 +107,13 @@ export function Header() {
 
             {/* Mobile menu button */}
             <div className="lg:hidden flex items-center space-x-4">
-              <SantaButton />
               <ThemeToggle />
               <button
                 onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                className="text-muted-foreground hover:text-branding-600 transition-colors duration-200"
+                className="p-3 text-muted-foreground hover:text-branding-600 transition-colors duration-200"
                 aria-label="Toggle mobile menu"
+                aria-expanded={isMobileMenuOpen}
+                aria-controls="mobile-navigation"
               >
                 {isMobileMenuOpen ? (
                   <X className="h-6 w-6" />
@@ -125,7 +126,7 @@ export function Header() {
 
           {/* Mobile Navigation */}
           {isMobileMenuOpen && (
-            <div className="lg:hidden mt-4 pb-4">
+            <div id="mobile-navigation" className="lg:hidden mt-4 pb-4">
               <div className="bg-muted/90 backdrop-blur-md rounded-xl border border-branding-200 dark:border-branding-800 p-6">
                 <div className="space-y-4">
                   {navigation.map((item) => (

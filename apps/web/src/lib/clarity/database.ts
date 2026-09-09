@@ -1,21 +1,18 @@
+import 'server-only'
 import { createClient } from '@supabase/supabase-js'
 
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-// Try service role key first, fallback to anon key for testing
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!
-
-export const supabaseAdmin = createClient(supabaseUrl, supabaseKey, {
-  auth: {
-    autoRefreshToken: false,
-    persistSession: false
-  }
-})
+function getAdminClient() {
+  if (!process.env.SUPABASE_SERVICE_ROLE_KEY) throw new Error('Analytics unavailable')
+  return createClient(process.env.NEXT_PUBLIC_SUPABASE_URL!, process.env.SUPABASE_SERVICE_ROLE_KEY, {
+    auth: { autoRefreshToken: false, persistSession: false }
+  })
+}
 
 /**
  * Get latest Clarity analytics from database
  */
 export async function getLatestAnalytics() {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getAdminClient()
     .from('clarity_analytics')
     .select('*')
     .order('fetched_at', { ascending: false })
@@ -34,7 +31,7 @@ export async function getLatestAnalytics() {
  * Save Clarity analytics to database
  */
 export async function saveAnalytics(analyticsData: any) {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getAdminClient()
     .from('clarity_analytics')
     .insert({
       data: analyticsData,
@@ -55,7 +52,7 @@ export async function saveAnalytics(analyticsData: any) {
  * Get today's API usage stats
  */
 export async function getApiUsage() {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getAdminClient()
     .rpc('get_todays_api_usage')
 
   if (error) {
@@ -70,7 +67,7 @@ export async function getApiUsage() {
  * Increment API usage counter
  */
 export async function incrementApiUsage() {
-  const { data, error } = await supabaseAdmin
+  const { data, error } = await getAdminClient()
     .rpc('increment_api_usage')
 
   if (error) {

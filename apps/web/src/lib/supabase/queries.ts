@@ -30,6 +30,7 @@ export async function getProjects(): Promise<Project[]> {
     .select('*')
     .eq('featured', true)
     .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -48,6 +49,7 @@ export async function getFeaturedProjects(): Promise<Project[]> {
     .select('*')
     .eq('featured', true)
     .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
     .order('created_at', { ascending: false })
     .limit(3)
 
@@ -66,6 +68,7 @@ export async function getAllProjects(): Promise<Project[]> {
     .from('projects')
     .select('*')
     .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
     .order('created_at', { ascending: false })
 
   if (error) {
@@ -84,6 +87,7 @@ export async function getProjectBySlug(slug: string): Promise<Project | null> {
     .select('*')
     .eq('slug', slug)
     .not('published_at', 'is', null)
+    .lte('published_at', new Date().toISOString())
     .single()
 
   if (error) {

@@ -1,3 +1,4 @@
+import { requireAdmin } from '@/lib/admin'
 import { NextResponse } from 'next/server'
 import { saveAnalytics, getApiUsage, incrementApiUsage } from '@/lib/clarity/database'
 
@@ -11,8 +12,10 @@ import { saveAnalytics, getApiUsage, incrementApiUsage } from '@/lib/clarity/dat
  * - Tracked in Supabase
  */
 
-export async function POST() {
+export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     // Check if we have API calls remaining
     const usage = await getApiUsage()
     
@@ -40,7 +43,6 @@ export async function POST() {
       )
     }
 
-    console.log(`🔄 Manual sync requested (${usage.requests_remaining} requests remaining)`)
     
     // Fetch from Clarity API
     const url = 'https://www.clarity.ms/export-data/api/v1/project-live-insights?numOfDays=1&dimension1=URL'
@@ -70,18 +72,18 @@ export async function POST() {
     }
 
     const rawData = await response.json()
-    console.log('✅ Clarity API response received')
+
     
     // Parse and structure the data
     const insights = parseClarityData(rawData)
     
     // Save to Supabase
     await saveAnalytics(insights)
-    console.log('💾 Saved to Supabase database')
+
     
     // Increment usage counter
     const newCount = await incrementApiUsage()
-    console.log(`📊 API usage: ${newCount}/10 requests today`)
+
     
     return NextResponse.json({
       success: true,

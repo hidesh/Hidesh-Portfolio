@@ -14,18 +14,20 @@ export default function LoginPage() {
   const [checking, setChecking] = useState(true)
   const [error, setError] = useState('')
   const router = useRouter()
-  const supabase = createClient()
+
 
   // Check if user is already logged in
   useEffect(() => {
     const checkAuth = async () => {
       try {
+        const supabase = createClient()
         const { data: { user } } = await supabase.auth.getUser()
-        const isDummyAuth = document.cookie.includes('dummyAuth=true')
+
         
-        if (user || isDummyAuth) {
+        if (user?.app_metadata?.role === 'admin') {
           const urlParams = new URLSearchParams(window.location.search)
-          const redirectTo = urlParams.get('redirectedFrom') || '/cms'
+          const requested = urlParams.get('redirectedFrom')
+          const redirectTo = requested === '/cms' || requested?.startsWith('/cms/') ? requested : '/cms'
           router.push(redirectTo)
         } else {
           setChecking(false)
@@ -45,6 +47,7 @@ export default function LoginPage() {
     setError('')
 
     try {
+      const supabase = createClient()
       const { error } = await supabase.auth.signInWithPassword({
         email,
         password,
@@ -54,9 +57,15 @@ export default function LoginPage() {
         throw new Error(error.message)
       }
 
+      const { data: { user } } = await supabase.auth.getUser()
+      if (user?.app_metadata?.role !== 'admin') {
+        await supabase.auth.signOut()
+        throw new Error('This account does not have administrator access.')
+      }
       // Get redirect URL from search params or default to /cms
       const urlParams = new URLSearchParams(window.location.search)
-      const redirectTo = urlParams.get('redirectedFrom') || '/cms'
+      const requested = urlParams.get('redirectedFrom')
+          const redirectTo = requested === '/cms' || requested?.startsWith('/cms/') ? requested : '/cms'
       router.push(redirectTo)
     } catch (error: unknown) {
       const errorMessage = error instanceof Error ? error.message : 'Login failed'

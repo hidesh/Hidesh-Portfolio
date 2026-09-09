@@ -8,8 +8,8 @@ on:
   workflow_dispatch:
 
 env:
-  NODE_VERSION: '20'
-  PNPM_VERSION: '8'
+  NODE_VERSION: '22'
+  PNPM_VERSION: '8.15.4'
 
 jobs:
   # ===================================
@@ -29,27 +29,16 @@ jobs:
           base: main
           head: HEAD
 
-      - name: 🛡️ Run security audit
-        run: |
-          # Check for hardcoded secrets
-          if grep -r "eyJ" --exclude-dir=node_modules --exclude="*.md" .; then
-            echo "❌ Potential JWT tokens found in code!"
-            exit 1
-          fi
-          
-          # Check for API keys
-          if grep -r "sk-" --exclude-dir=node_modules --exclude="*.md" .; then
-            echo "❌ Potential API keys found in code!"
-            exit 1
-          fi
-          
-          # Check for placeholder values in production files
-          if grep -r "your_.*_here" --exclude-dir=node_modules --exclude="*.example" --exclude="*.md" .; then
-            echo "❌ Placeholder values found in production files!"
-            exit 1
-          fi
-          
-          echo "✅ Security scan passed"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: pnpm/action-setup@v4
+        with:
+          version: '8.15.4'
+      - name: Install locked dependencies
+        run: pnpm install --frozen-lockfile --ignore-scripts
+      - name: Audit all dependencies
+        run: pnpm audit --audit-level=low
 
   # ===================================
   # QUALITY CHECKS
@@ -61,7 +50,7 @@ jobs:
     
     strategy:
       matrix:
-        node-version: [18, 20]
+        node-version: [22, 24]
         
     steps:
       - name: 📥 Checkout code

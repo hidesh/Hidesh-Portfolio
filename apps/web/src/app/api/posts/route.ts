@@ -1,10 +1,24 @@
+import { z } from 'zod'
+import { InvalidBody, readJsonBody } from '@/lib/request-body'
+import { requireAdmin } from '@/lib/admin'
 import { NextRequest, NextResponse } from 'next/server'
 import { createClient, createServiceClient } from '@/lib/supabase/server'
 
 
 
-export async function GET() {
+const postSchema = z.object({
+  id: z.string().uuid().optional(),
+  title: z.string().trim().min(1).max(200),
+  excerpt: z.string().trim().min(1).max(2000),
+  body_mdx: z.string().trim().min(1).max(200000),
+  tags: z.array(z.string().trim().min(1).max(50)).max(20).default([]),
+  published_at: z.string().datetime({ offset: true }).nullable().optional(),
+})
+
+export async function GET(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     const supabase = await createClient()
     
     // Using existing posts table
@@ -21,21 +35,24 @@ export async function GET() {
 
     return NextResponse.json(posts)
   } catch (error) {
+    if (error instanceof InvalidBody) return NextResponse.json({ error: error.message }, { status: 400 })
     console.error('Error fetching posts:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function POST(request: NextRequest) {
+export async function POST(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     // Use service role to bypass RLS for CMS admin operations
     const supabase = createServiceClient()
     
-    // For now, use the existing profile ID from database
-    // TODO: Get current user properly
-    const user = { id: '0ead8d37-8ddd-4b1d-b4c1-061d5927191c' } // Real profile ID from database
+    const user = auth.user
 
-    const body = await request.json()
+    const result = postSchema.safeParse(await readJsonBody(request, 250000))
+    if (!result.success) return NextResponse.json({ error: 'Invalid post fields' }, { status: 400 })
+    const body = result.data
     const { title, excerpt, body_mdx, tags, published_at } = body
 
     // Validate required fields
@@ -77,11 +94,10 @@ export async function POST(request: NextRequest) {
       published_at: published_at || null
     }
 
-    console.log('Creating post with data:', JSON.stringify(postData, null, 2))
 
     const { data: post, error } = await supabase
       .from('posts')
-      // @ts-expect-error - Supabase type mismatch
+
       .insert([postData])
       .select('*')
       .single()
@@ -98,20 +114,24 @@ export async function POST(request: NextRequest) {
 
     return NextResponse.json(post)
   } catch (error) {
+    if (error instanceof InvalidBody) return NextResponse.json({ error: error.message }, { status: 400 })
     console.error('Error creating post:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }
 }
 
-export async function PUT(request: NextRequest) {
+export async function PUT(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     // Use service role to bypass RLS for admin operations
     const supabase = createServiceClient()
 
-    // For now, use the existing profile ID from database
-    const user = { id: '0ead8d37-8ddd-4b1d-b4c1-061d5927191c' }
+    const user = auth.user
 
-    const body = await request.json()
+    const result = postSchema.safeParse(await readJsonBody(request, 250000))
+    if (!result.success) return NextResponse.json({ error: 'Invalid post fields' }, { status: 400 })
+    const body = result.data
     const { id, title, excerpt, body_mdx, tags, published_at } = body
 
     // Validate required fields
@@ -150,11 +170,10 @@ export async function PUT(request: NextRequest) {
       updated_at: new Date().toISOString()
     }
 
-    console.log('Updating post with data:', JSON.stringify(postData, null, 2))
 
     const { data: post, error } = await supabase
       .from('posts')
-      // @ts-expect-error - Supabase type mismatch
+
       .update(postData)
       .eq('id', id)
       .select('*')
@@ -172,6 +191,7 @@ export async function PUT(request: NextRequest) {
 
     return NextResponse.json(post)
   } catch (error) {
+    if (error instanceof InvalidBody) return NextResponse.json({ error: error.message }, { status: 400 })
     console.error('Error updating post:', error)
     return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
   }

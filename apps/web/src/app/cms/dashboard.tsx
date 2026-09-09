@@ -195,14 +195,14 @@ export default function CMSPage() {
   const checkUser = async () => {
     const { data: { user } } = await supabase.auth.getUser()
     
-    // Also check for dummy auth
-    const isDummyAuth = document.cookie.includes('dummyAuth=true')
+
+
     
-    if (!user && !isDummyAuth) {
+    if (user?.app_metadata?.role !== 'admin') {
       router.push('/login')
       return false
     } else {
-      setUser(user || { email: 'hidesh@live.dk' })
+      setUser(user)
       return true
     }
   }
@@ -261,7 +261,7 @@ export default function CMSPage() {
 
 
   const handleSignOut = async () => {
-    document.cookie = 'dummyAuth=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+
     await supabase.auth.signOut()
     router.push('/login')
   }

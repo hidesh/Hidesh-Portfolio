@@ -30,9 +30,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   try {
     const supabase = await createClient()
     const { data: posts } = await supabase
-      .from('blog_posts')
+      .from('posts')
       .select('slug, updated_at, created_at')
-      .eq('published', true)
+      .not('published_at', 'is', null).lte('published_at', new Date().toISOString())
       .order('created_at', { ascending: false })
 
     const blogRoutes: MetadataRoute.Sitemap = posts?.map((post: any) => ({

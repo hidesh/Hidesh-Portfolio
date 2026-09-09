@@ -1,7 +1,17 @@
-// Generate HMAC key for ALTCHA
-// In production, use a secure random string stored in environment variables
-const ALTCHA_HMAC_KEY = process.env.ALTCHA_HMAC_KEY || 'your-secret-hmac-key-change-in-production'
+import {
+  createHash,
+  createHmac,
+  randomBytes,
+  randomInt,
+  timingSafeEqual,
+} from 'node:crypto'
 
+function getKey() {
+  const key = process.env.ALTCHA_HMAC_KEY
+  if (!key || key.length < 32)
+    throw new Error('ALTCHA_HMAC_KEY must contain at least 32 characters')
+  return key
+}
 export interface AltchaChallenge {
   algorithm: string
   challenge: string
@@ -9,75 +19,53 @@ export interface AltchaChallenge {
   salt: string
   signature: string
 }
-
-/**
- * Create a new ALTCHA challenge
- */
 export async function generateAltchaChallenge(): Promise<AltchaChallenge> {
-  const crypto = require('crypto')
-  
-  // Generate random salt
-  const salt = crypto.randomBytes(16).toString('hex')
-  
-  // Generate random challenge number
-  const maxNumber = 50000 // Difficulty level
-  const challengeNumber = Math.floor(Math.random() * maxNumber)
-  
-  // Create the challenge string
-  const algorithm = 'SHA-256'
-  const challenge = crypto
-    .createHash('sha256')
-    .update(salt + challengeNumber.toString())
+  const key = getKey()
+  const salt = `${randomBytes(16).toString('hex')}?expires=${Date.now() + 300000}`
+  const maxnumber = 50000
+  const challenge = createHash('sha256')
+    .update(salt + randomInt(maxnumber + 1))
     .digest('hex')
-  
-  // Create HMAC signature
-  const signature = crypto
-    .createHmac('sha256', ALTCHA_HMAC_KEY)
-    .update(challenge)
-    .digest('hex')
-
   return {
-    algorithm,
+    algorithm: 'SHA-256',
     challenge,
-    maxnumber: maxNumber,
+    maxnumber,
     salt,
-    signature,
+    signature: createHmac('sha256', key).update(challenge).digest('hex'),
   }
 }
-
-/**
- * Verify ALTCHA solution from client
- */
 export async function verifyAltchaSolution(payload: string): Promise<boolean> {
   try {
-    const data = JSON.parse(Buffer.from(payload, 'base64').toString('utf-8'))
-    const { algorithm, challenge, number, salt, signature } = data
-    
-    if (!algorithm || !challenge || number === undefined || !salt || !signature) {
+    if (typeof payload !== 'string' || payload.length > 4096) return false
+    const { algorithm, challenge, number, salt, signature } = JSON.parse(
+      Buffer.from(payload, 'base64').toString('utf8')
+    )
+    if (
+      algorithm !== 'SHA-256' ||
+      !Number.isInteger(number) ||
+      number < 0 ||
+      number > 50000 ||
+      typeof salt !== 'string' ||
+      !/^[a-f0-9]{32}\?expires=\d{13}$/.test(salt)
+    )
       return false
-    }
-
-    const crypto = require('crypto')
-    
-    // Verify signature matches
-    const expectedSignature = crypto
-      .createHmac('sha256', ALTCHA_HMAC_KEY)
-      .update(challenge)
-      .digest('hex')
-    
-    if (signature !== expectedSignature) {
+    if (
+      typeof challenge !== 'string' ||
+      typeof signature !== 'string' ||
+      !/^[a-f0-9]{64}$/.test(challenge) ||
+      !/^[a-f0-9]{64}$/.test(signature)
+    )
       return false
-    }
-    
-    // Verify the solution
-    const hash = crypto
-      .createHash('sha256')
-      .update(salt + number.toString())
-      .digest('hex')
-    
-    return hash === challenge
-  } catch (error) {
-    console.error('ALTCHA verification error:', error)
+    const expires = Number(salt.split('=')[1])
+    if (expires < Date.now() || expires > Date.now() + 300000) return false
+    const expected = createHmac('sha256', getKey()).update(challenge).digest()
+    return (
+      timingSafeEqual(Buffer.from(signature, 'hex'), expected) &&
+      createHash('sha256')
+        .update(salt + number)
+        .digest('hex') === challenge
+    )
+  } catch {
     return false
   }
 }

@@ -1,8 +1,11 @@
+import { requireAdmin } from '@/lib/admin'
 import { createServiceClient } from '@/lib/supabase/server'
 import { NextRequest, NextResponse } from 'next/server'
 
-export async function GET() {
+export async function GET(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     const supabase = createServiceClient()
     
     // List all files in blog-images bucket
@@ -37,9 +40,11 @@ export async function GET() {
     })
 
     // Get all posts to check image usage
-    const { data: posts } = await supabase
+    const { data: posts, error: postsError } = await supabase
       .from('posts')
       .select('id, title, slug, body_mdx')
+
+    if (postsError) return NextResponse.json({ error: 'Failed to load image usage' }, { status: 500 })
 
     // Find which posts use each image
     const filesWithUsage = filesWithUrls.map(file => {
@@ -64,11 +69,13 @@ export async function GET() {
   }
 }
 
-export async function DELETE(request: NextRequest) {
+export async function DELETE(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     const { fileName } = await request.json()
 
-    if (!fileName) {
+    if (!isFileName(fileName)) {
       return NextResponse.json({ error: 'File name required' }, { status: 400 })
     }
 
@@ -90,11 +97,13 @@ export async function DELETE(request: NextRequest) {
   }
 }
 
-export async function PATCH(request: NextRequest) {
+export async function PATCH(request: Request) {
   try {
+    const auth = await requireAdmin(request)
+    if (auth.response) return auth.response
     const { fileName, newName } = await request.json()
 
-    if (!fileName || !newName) {
+    if (!isFileName(fileName) || !isFileName(newName)) {
       return NextResponse.json({ error: 'File name and new name required' }, { status: 400 })
     }
 
@@ -132,20 +141,23 @@ export async function PATCH(request: NextRequest) {
       .getPublicUrl(newName)
 
     // Update all posts that use this image
-    const { data: posts } = await supabase
+    const { data: posts, error: postsError } = await supabase
       .from('posts')
       .select('id, body_mdx')
       .like('body_mdx', `%${oldUrl}%`)
+
+    if (postsError) return NextResponse.json({ error: 'Could not verify image usage; original image retained' }, { status: 500 })
 
     if (posts && posts.length > 0) {
       // Update each post's markdown content
       for (const post of posts) {
         const updatedContent = post.body_mdx.replace(new RegExp(oldUrl.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), newUrl)
         
-        await supabase
+        const { error: updateError } = await supabase
           .from('posts')
           .update({ body_mdx: updatedContent, updated_at: new Date().toISOString() })
           .eq('id', post.id)
+        if (updateError) return NextResponse.json({ error: 'Rename incomplete; original image retained' }, { status: 500 })
       }
     }
 
@@ -163,4 +175,8 @@ export async function PATCH(request: NextRequest) {
     console.error('Rename error:', error)
     return NextResponse.json({ error: 'Failed to rename file' }, { status: 500 })
   }
+}
+
+function isFileName(value: unknown): value is string {
+  return typeof value === 'string' && value.length <= 200 && /^[a-zA-Z0-9][a-zA-Z0-9._-]*$/.test(value) && !value.includes('..')
 }

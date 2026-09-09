@@ -1,27 +1,36 @@
+import { InvalidBody, readJsonBody } from '@/lib/request-body'
+import { contactSchema, contactFingerprints } from '@/lib/contact-security'
 import { NextRequest, NextResponse } from 'next/server'
 import { Resend } from 'resend'
 import { createClient } from '@supabase/supabase-js'
 import { verifyAltchaSolution } from '@/lib/altcha'
-import { checkRateLimit, getResetTime } from '@/lib/rate-limit'
 
-const resend = new Resend(process.env.RESEND_API_KEY)
-const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL!
-const supabaseKey = process.env.SUPABASE_SERVICE_ROLE_KEY!
-
-const supabase = createClient(supabaseUrl, supabaseKey)
+function escapeHtml(value: string) {
+  return value.replace(
+    /[&<>"']/g,
+    c =>
+      ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[
+        c
+      ]!
+  )
+}
 
 export async function POST(request: NextRequest) {
   try {
-    const body = await request.json()
-    const { name, email, subject, message, altchaPayload } = body
-
-    // Validation
-    if (!name || !email || !subject || !message) {
+    const origin = request.headers.get('origin')
+    if (!origin || origin !== new URL(request.url).origin) {
       return NextResponse.json(
-        { error: 'All fields are required' },
-        { status: 400 }
+        { error: 'Invalid form origin' },
+        { status: 403 }
       )
     }
+    const parsed = contactSchema.safeParse(await readJsonBody(request))
+    if (!parsed.success)
+      return NextResponse.json(
+        { error: 'Please check your form fields and verification.' },
+        { status: 400 }
+      )
+    const { name, email, subject, message, altchaPayload } = parsed.data
 
     // Verify ALTCHA challenge
     if (!altchaPayload) {
@@ -39,65 +48,78 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    if (message.length > 2000) {
+    const hashes = contactFingerprints(request, email, message)
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.SUPABASE_SERVICE_ROLE_KEY!
+    )
+    const challenge = JSON.parse(
+      Buffer.from(altchaPayload, 'base64').toString('utf8')
+    ).challenge
+    const { data: result, error: admissionError } = await supabase.rpc(
+      'submit_contact',
+      {
+        p_challenge: challenge,
+        p_sender_hash: hashes.sender,
+        p_ip_hash: hashes.ip,
+        p_message_hash: hashes.message,
+        p_name: name,
+        p_email: email,
+        p_subject: subject,
+        p_message: message,
+      }
+    )
+    if (admissionError || !result)
       return NextResponse.json(
-        { error: 'Message is too long (max 2000 characters)' },
-        { status: 400 }
-      )
-    }
-
-    // Email validation (strict RFC 5322 compliant)
-    const emailRegex = /^[a-zA-Z0-9.!#$%&'*+/=?^_`{|}~-]+@[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?(?:\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?)*$/
-    if (!emailRegex.test(email)) {
-      return NextResponse.json(
-        { error: 'Please enter a valid email address' },
-        { status: 400 }
-      )
-    }
-
-    // Check rate limit
-    const rateLimit = checkRateLimit(email)
-    if (!rateLimit.allowed) {
-      const resetTime = getResetTime(rateLimit.resetAt)
-      return NextResponse.json(
-        { 
-          error: `Too many submissions. Please try again in ${resetTime}.`,
-          resetAt: rateLimit.resetAt,
-        },
-        { status: 429 }
-      )
-    }
-
-    // Save to Supabase - combine subject and message
-    const fullMessage = subject ? `Subject: ${subject}\n\n${message}` : message
-    
-    console.log('Attempting to save to Supabase:', { name, email, messageLength: fullMessage.length, handled: false })
-    
-    const { data: savedMessage, error: dbError } = await supabase
-      .from('contacts')
-      .insert([
         {
-          name,
-          email,
-          message: fullMessage,
-          handled: false,
+          error:
+            'Contact form temporarily unavailable. Please email me directly.',
         },
-      ])
-      .select()
-      .single()
-
-    console.log('Supabase response:', { savedMessage, dbError })
-
-    if (dbError) {
-      console.error('Database error:', dbError)
-      return NextResponse.json(
-        { error: 'Failed to save message' },
-        { status: 500 }
+        { status: 503 }
       )
-    }
+    if (result.status === 'duplicate')
+      return NextResponse.json(
+        {
+          error:
+            'This message has already been received. There is no need to send it again.',
+        },
+        { status: 409 }
+      )
+    if (result.status === 'replayed')
+      return NextResponse.json(
+        {
+          error:
+            'This verification has already been used. Please verify again.',
+        },
+        { status: 400 }
+      )
+    if (result.status === 'rate_limited')
+      return NextResponse.json(
+        {
+          error:
+            'Too many messages. Please try again later or email me directly.',
+        },
+        {
+          status: 429,
+          headers: {
+            'Retry-After': String(
+              Number.isInteger(result.retry_after)
+                ? Math.min(86400, Math.max(1, result.retry_after))
+                : 900
+            ),
+          },
+        }
+      )
+    if (result.status !== 'accepted' || typeof result.id !== 'string')
+      return NextResponse.json(
+        { error: 'Could not accept message' },
+        { status: 503 }
+      )
+    const savedMessage = { id: result.id }
 
     // Send email via Resend
     try {
+      const resend = new Resend(process.env.RESEND_API_KEY)
       await resend.emails.send({
         from: 'Portfolio Contact <onboarding@resend.dev>',
         to: process.env.CONTACT_EMAIL || 'hidesh@live.dk',
@@ -108,14 +130,14 @@ export async function POST(request: NextRequest) {
             <h2 style="color: #2563eb; border-bottom: 2px solid #2563eb; padding-bottom: 10px;">New Contact Form Submission</h2>
             
             <div style="margin: 20px 0;">
-              <p style="margin: 8px 0;"><strong>From:</strong> ${name}</p>
-              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${email}" style="color: #2563eb;">${email}</a></p>
-              <p style="margin: 8px 0;"><strong>Subject:</strong> ${subject}</p>
+              <p style="margin: 8px 0;"><strong>From:</strong> ${escapeHtml(name)}</p>
+              <p style="margin: 8px 0;"><strong>Email:</strong> <a href="mailto:${escapeHtml(email)}" style="color: #2563eb;">${escapeHtml(email)}</a></p>
+              <p style="margin: 8px 0;"><strong>Subject:</strong> ${escapeHtml(subject)}</p>
             </div>
 
             <div style="background: #f9fafb; padding: 15px; border-radius: 6px; margin: 20px 0;">
               <h3 style="margin-top: 0; color: #374151;">Message:</h3>
-              <p style="white-space: pre-wrap; line-height: 1.6; color: #1f2937;">${message}</p>
+              <p style="white-space: pre-wrap; line-height: 1.6; color: #1f2937;">${escapeHtml(message)}</p>
             </div>
 
             <div style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #e0e0e0; font-size: 12px; color: #6b7280;">
@@ -146,6 +168,8 @@ export async function POST(request: NextRequest) {
       { status: 200 }
     )
   } catch (error) {
+    if (error instanceof InvalidBody)
+      return NextResponse.json({ error: error.message }, { status: 400 })
     console.error('Contact form error:', error)
     return NextResponse.json(
       { error: 'Internal server error' },

@@ -27,6 +27,17 @@ export default function CookiePolicyPage() {
           </p>
 
           <section>
+            <h2 className="text-2xl font-bold text-foreground mb-4">Contact form spam protection</h2>
+            <p>
+              The contact form uses a local proof-of-work challenge and limits repeated submissions.
+              Keyed fingerprints of the sender address, network address, and message are used to detect
+              repeated messages and abuse. The spam table stores these fingerprints rather than raw IP
+              addresses. Records older than 24 hours are removed when the next submission is processed.
+              This protection does not set advertising or tracking cookies.
+            </p>
+          </section>
+
+          <section>
             <h2 className="text-2xl font-bold text-foreground mb-4">What are cookies?</h2>
             <p>
               Cookies are small text files that are stored on your computer or mobile device when you visit a website. 
